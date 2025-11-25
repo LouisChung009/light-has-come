@@ -17,11 +17,11 @@ export default function RootLayout({
             <head>
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-                {/* 方案 B: 全站 ZCOOL XiaoWei */}
-                <link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
+                {/* 方案 C: 全站 Noto Serif TC */}
+                <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
             </head>
             <body style={{
-                fontFamily: "'ZCOOL XiaoWei', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                fontFamily: "'Noto Serif TC', Georgia, serif",
             }}>
                 {children}
             </body>

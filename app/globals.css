@@ -1,26 +1,194 @@
 @import "tailwindcss";
 
 :root {
+  /* 光·來了 品牌色彩 */
+  --color-gold: #FFD93D;
+  --color-coral: #FFAAA5;
+  --color-blue: #4A90C8;
+  --color-deep-blue: #2E5C8A;
+  --color-mint: #B4E7CE;
+  --color-cream: #FFF8E7;
+  --color-light-gray: #F5F5F5;
+  --color-gray: #666666;
+  --color-dark: #333333;
+  --color-white: #FFFFFF;
+
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #333333;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-brand-gold: var(--color-gold);
+  --color-brand-coral: var(--color-coral);
+  --color-brand-blue: var(--color-blue);
+  --color-brand-deep-blue: var(--color-deep-blue);
+  --color-brand-mint: var(--color-mint);
+  --color-brand-cream: var(--color-cream);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'jf-openhuninn-2.0', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-weight: 400;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-width: 320px;
+  letter-spacing: 0.02em;
+}
+
+/* 強制所有元素使用粉圓字體 */
+* {
+  font-family: 'jf-openhuninn-2.0', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+/* 標題使用粉圓字體 */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'jf-openhuninn-2.0', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+}
+
+/* 內文使用粉圓字體 */
+p {
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+
+/* 確保容器有適當間距 */
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+/* 動畫 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* 工具類別 */
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* 強制間距 */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  line-height: 1.2;
+}
+
+p {
+  margin: 0;
+}
+
+/* 響應式文字大小 */
+@media (max-width: 639px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 16px;
+  }
 }
