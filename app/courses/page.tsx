@@ -1,8 +1,20 @@
-'use client';
+import Link from 'next/link'
+import { createClient } from '@/utils/supabase/server'
 
-import Link from 'next/link';
+export default async function Courses() {
+    const supabase = await createClient()
 
-export default function Courses() {
+    // Fetch content from Supabase
+    const { data: content } = await supabase
+        .from('site_content')
+        .select('*')
+        .eq('category', 'courses')
+
+    // Helper function to get content by ID
+    const getContent = (id: string) => {
+        return content?.find(item => item.id === id)?.content || ''
+    }
+
     return (
         <div style={{ minHeight: '100vh', background: '#FFF8E7' }}>
             {/* Header */}
@@ -40,8 +52,12 @@ export default function Courses() {
                 textAlign: 'center'
             }}>
                 <div className="container">
-                    <h1 style={{ fontSize: 'clamp(2rem, 5vw, 2.5rem)', marginBottom: '1rem' }}>分齡課程介紹</h1>
-                    <p style={{ fontSize: 'clamp(1rem, 2.5vw, 1.125rem)', opacity: 0.9 }}>為不同年齡的孩子量身打造的成長計畫</p>
+                    <h1 style={{ fontSize: 'clamp(2rem, 5vw, 2.5rem)', marginBottom: '1rem' }}>
+                        {getContent('courses_intro_title')}
+                    </h1>
+                    <p style={{ fontSize: 'clamp(1rem, 2.5vw, 1.125rem)', opacity: 0.9 }}>
+                        {getContent('courses_intro_desc')}
+                    </p>
                 </div>
             </section>
 
@@ -67,13 +83,17 @@ export default function Courses() {
                             color: 'white'
                         }}>
                             <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🐣</div>
-                            <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>幼幼班</h2>
-                            <p style={{ fontSize: '1.25rem', opacity: 0.9 }}>2-6 歲 | 學齡前兒童</p>
+                            <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
+                                {getContent('courses_toddler_name')}
+                            </h2>
+                            <p style={{ fontSize: '1.25rem', opacity: 0.9 }}>
+                                {getContent('courses_toddler_age')}
+                            </p>
                         </div>
                         <div style={{ padding: '2rem 3rem 3rem' }}>
                             <h3 style={{ fontSize: '1.5rem', color: '#333', marginBottom: '1.5rem', borderBottom: '2px solid #FFD93D', display: 'inline-block', paddingBottom: '0.5rem' }}>課程特色</h3>
                             <p style={{ color: '#666', lineHeight: 1.8, marginBottom: '2rem' }}>
-                                針對學齡前兒童設計，透過感官體驗、遊戲互動和簡單的故事，幫助孩子建立對上帝的初步認識，並學習基本的生活常規與品格。
+                                {getContent('courses_toddler_desc')}
                             </p>
 
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
@@ -117,13 +137,17 @@ export default function Courses() {
                             color: 'white'
                         }}>
                             <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🌱</div>
-                            <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>撒母耳班</h2>
-                            <p style={{ fontSize: '1.25rem', opacity: 0.9 }}>7-9 歲 | 國小低年級</p>
+                            <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
+                                {getContent('courses_samuel_name')}
+                            </h2>
+                            <p style={{ fontSize: '1.25rem', opacity: 0.9 }}>
+                                {getContent('courses_samuel_age')}
+                            </p>
                         </div>
                         <div style={{ padding: '2rem 3rem 3rem' }}>
                             <h3 style={{ fontSize: '1.5rem', color: '#333', marginBottom: '1.5rem', borderBottom: '2px solid #4A90C8', display: 'inline-block', paddingBottom: '0.5rem' }}>課程特色</h3>
                             <p style={{ color: '#666', lineHeight: 1.8, marginBottom: '2rem' }}>
-                                隨著孩子進入小學，我們開始深入淺出的聖經故事教學，結合生活應用，培養孩子獨立思考的能力，並學習與同儕合作。
+                                {getContent('courses_samuel_desc')}
                             </p>
 
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
@@ -167,13 +191,17 @@ export default function Courses() {
                             color: 'white'
                         }}>
                             <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🌟</div>
-                            <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>約書亞班</h2>
-                            <p style={{ fontSize: '1.25rem', opacity: 0.9 }}>10-12 歲 | 國小高年級</p>
+                            <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
+                                {getContent('courses_joshua_name')}
+                            </h2>
+                            <p style={{ fontSize: '1.25rem', opacity: 0.9 }}>
+                                {getContent('courses_joshua_age')}
+                            </p>
                         </div>
                         <div style={{ padding: '2rem 3rem 3rem' }}>
                             <h3 style={{ fontSize: '1.5rem', color: '#333', marginBottom: '1.5rem', borderBottom: '2px solid #FFAAA5', display: 'inline-block', paddingBottom: '0.5rem' }}>課程特色</h3>
                             <p style={{ color: '#666', lineHeight: 1.8, marginBottom: '2rem' }}>
-                                針對高年級孩子，我們強調信仰的實踐與領導力的培養。透過深入的討論與服務學習，幫助孩子建立穩固的價值觀，成為有影響力的人。
+                                {getContent('courses_joshua_desc')}
                             </p>
 
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
@@ -261,5 +289,5 @@ export default function Courses() {
                 </div>
             </footer>
         </div>
-    );
+    )
 }

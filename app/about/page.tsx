@@ -1,8 +1,20 @@
-'use client';
+import Link from 'next/link'
+import { createClient } from '@/utils/supabase/server'
 
-import Link from 'next/link';
+export default async function About() {
+    const supabase = await createClient()
 
-export default function About() {
+    // Fetch content from Supabase
+    const { data: content } = await supabase
+        .from('site_content')
+        .select('*')
+        .in('category', ['about', 'contact'])
+
+    // Helper function to get content by ID
+    const getContent = (id: string) => {
+        return content?.find(item => item.id === id)?.content || ''
+    }
+
     return (
         <div style={{ minHeight: '100vh', background: '#F5F5F5' }}>
             {/* Header */}
@@ -40,18 +52,23 @@ export default function About() {
                 textAlign: 'center'
             }}>
                 <div className="container">
-                    <h1 style={{ fontSize: 'clamp(2rem, 5vw, 2.5rem)', marginBottom: '1rem' }}>關於我們</h1>
-                    <p style={{ fontSize: 'clamp(1rem, 2.5vw, 1.125rem)', opacity: 0.9 }}>認識「光·來了」的異象與團隊</p>
+                    <h1 style={{ fontSize: 'clamp(2rem, 5vw, 2.5rem)', marginBottom: '1rem' }}>
+                        {getContent('about_title')}
+                    </h1>
+                    <p style={{ fontSize: 'clamp(1rem, 2.5vw, 1.125rem)', opacity: 0.9 }}>
+                        {getContent('about_intro')}
+                    </p>
                 </div>
             </section>
 
             {/* Vision Section */}
             <section style={{ padding: '4rem 1.5rem', background: 'white' }}>
                 <div className="container" style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
-                    <h2 style={{ fontSize: '2rem', color: '#333', marginBottom: '2rem' }}>我們的異象</h2>
+                    <h2 style={{ fontSize: '2rem', color: '#333', marginBottom: '2rem' }}>
+                        {getContent('about_vision_title')}
+                    </h2>
                     <p style={{ fontSize: '1.25rem', color: '#666', lineHeight: 1.8, marginBottom: '3rem' }}>
-                        「光·來了」源自約翰福音 12:46：「我就是來到世上的光，使凡信我的不住在黑暗裡。」<br />
-                        我們期盼每個來到這裡的孩子，都能被上帝的光照亮，並成為這世代的光，將愛與溫暖帶給周圍的人。
+                        {getContent('about_vision')}
                     </p>
                     <div style={{
                         display: 'grid',
@@ -75,8 +92,20 @@ export default function About() {
                 </div>
             </section>
 
-            {/* Team Section */}
+            {/* Mission Section */}
             <section style={{ padding: '4rem 1.5rem', background: '#F5F5F5' }}>
+                <div className="container" style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
+                    <h2 style={{ fontSize: '2rem', color: '#333', marginBottom: '2rem' }}>
+                        {getContent('about_mission_title')}
+                    </h2>
+                    <p style={{ fontSize: '1.25rem', color: '#666', lineHeight: 1.8 }}>
+                        {getContent('about_mission')}
+                    </p>
+                </div>
+            </section>
+
+            {/* Team Section */}
+            <section style={{ padding: '4rem 1.5rem', background: 'white' }}>
                 <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <h2 style={{ fontSize: '2rem', color: '#333', marginBottom: '3rem', textAlign: 'center' }}>專業師資團隊</h2>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
@@ -109,7 +138,7 @@ export default function About() {
             </section>
 
             {/* Contact Section */}
-            <section style={{ padding: '4rem 1.5rem', background: 'white' }}>
+            <section style={{ padding: '4rem 1.5rem', background: '#F5F5F5' }}>
                 <div className="container" style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
                     <h2 style={{ fontSize: '2rem', color: '#333', marginBottom: '2rem' }}>聯絡我們</h2>
                     <div style={{
@@ -121,10 +150,9 @@ export default function About() {
                     }}>
                         <h3 style={{ fontSize: '1.5rem', marginBottom: '2rem' }}>大里思恩堂兒童主日學</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontSize: '1.125rem' }}>
-                            <p>📍 地址：412台灣大里區東榮路312號</p>
-                            <p>📞 電話：04 2482 3735</p>
-                            <p>⏰ 時間：每週日 10:00 - 11:30</p>
-                            <p>📧 Email：light.has.come@example.com</p>
+                            <p>📍 地址：{getContent('contact_address')}</p>
+                            <p>📞 電話：{getContent('contact_phone')}</p>
+                            <p>⏰ 時間：{getContent('contact_time')}</p>
                         </div>
                         <div style={{ marginTop: '3rem' }}>
                             <Link href="/register" style={{
@@ -163,9 +191,9 @@ export default function About() {
                         <div>
                             <h4 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>聯絡資訊</h4>
                             <div style={{ color: 'rgba(255,255,255,0.8)', lineHeight: 2 }}>
-                                <p>📍 412台灣大里區東榮路312號</p>
-                                <p>📞 04 2482 3735</p>
-                                <p>⏰ 每週日 10:00-11:30</p>
+                                <p>📍 {getContent('contact_address')}</p>
+                                <p>📞 {getContent('contact_phone')}</p>
+                                <p>⏰ {getContent('contact_time')}</p>
                             </div>
                         </div>
                         <div>
@@ -184,5 +212,5 @@ export default function About() {
                 </div>
             </footer>
         </div>
-    );
+    )
 }
