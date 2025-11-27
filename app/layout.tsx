@@ -6,6 +6,7 @@ export const metadata: Metadata = {
     description: "讓孩子在愛中成長，玩出喜樂、美善的品格。大里思恩堂兒童主日學，透過聖經故事、音樂律動、手作創意，培養孩子的品格與技能。",
     keywords: "兒童主日學, 大里思恩堂, 光來了, 品格教育, 兒童課程, 台中大里",
 };
+// Version: 2024-11-27 - Font updated to Huninn
 
 export default function RootLayout({
     children,
