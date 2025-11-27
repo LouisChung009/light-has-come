@@ -17,12 +17,12 @@ export default function RootLayout({
             <head>
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-                {/* 方案 B: 全站 ZCOOL XiaoWei */}
+                {/* 內文: ZCOOL XiaoWei (圓體) */}
                 <link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
+                {/* 標題: jf-openhuninn (粉圓) */}
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jf-openhuninn@2.1.0/font/jf-openhuninn.css" />
             </head>
-            <body style={{
-                fontFamily: "'ZCOOL XiaoWei', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-            }}>
+            <body>
                 {children}
             </body>
         </html>
