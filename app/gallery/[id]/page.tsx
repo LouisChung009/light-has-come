@@ -1,13 +1,72 @@
 'use client';
 
-import { use } from 'react';
+import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { albums } from '../../data/albums';
+import { useEffect, useState, use } from 'react';
+
+interface Photo {
+    id: string;
+    src: string;
+    alt: string;
+    width: number;
+    height: number;
+}
+
+interface Album {
+    id: string;
+    title: string;
+    date: string;
+    description: string;
+    cover_color: string;
+}
 
 export default function AlbumDetail({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const album = albums.find(a => a.id === id);
+    const [album, setAlbum] = useState<Album | null>(null);
+    const [photos, setPhotos] = useState<Photo[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchData() {
+            const supabase = createClient();
+
+            // Fetch album details
+            const { data: albumData, error: albumError } = await supabase
+                .from('albums')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (albumError || !albumData) {
+                console.error('Error fetching album:', albumError);
+                setLoading(false);
+                return;
+            }
+
+            setAlbum(albumData);
+
+            // Fetch photos
+            const { data: photosData, error: photosError } = await supabase
+                .from('photos')
+                .select('*')
+                .eq('album_id', id)
+                .order('created_at', { ascending: false });
+
+            if (photosError) {
+                console.error('Error fetching photos:', photosError);
+            } else {
+                setPhotos(photosData || []);
+            }
+            setLoading(false);
+        }
+
+        fetchData();
+    }, [id]);
+
+    if (loading) {
+        return <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>載入中...</div>;
+    }
 
     if (!album) {
         notFound();
@@ -44,7 +103,7 @@ export default function AlbumDetail({ params }: { params: Promise<{ id: string }
 
             {/* Album Header */}
             <section style={{
-                background: album.coverColor,
+                background: album.cover_color,
                 color: 'white',
                 padding: '4rem 1.5rem',
                 textAlign: 'center',
@@ -87,36 +146,37 @@ export default function AlbumDetail({ params }: { params: Promise<{ id: string }
             {/* Masonry Layout */}
             <section style={{ padding: '2rem 1.5rem' }}>
                 <div className="container">
-                    <div style={{
-                        columnCount: 3,
-                        columnGap: '1.5rem',
-                        // Responsive columns handled by media queries in style tag below
-                    }} className="masonry-grid">
-                        {album.photos.map((photo) => (
-                            <div key={photo.id} style={{
-                                breakInside: 'avoid',
-                                marginBottom: '1.5rem',
-                                background: 'white',
-                                borderRadius: '1rem',
-                                overflow: 'hidden',
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                                transition: 'transform 0.3s',
-                            }} className="hover:scale-[1.02]">
-                                <img
-                                    src={photo.src}
-                                    alt={photo.alt}
-                                    style={{
-                                        width: '100%',
-                                        height: 'auto',
-                                        display: 'block',
-                                    }}
-                                />
-                                <div style={{ padding: '1rem' }}>
-                                    <p style={{ margin: 0, fontSize: '0.875rem', color: '#666' }}>{photo.alt}</p>
+                    {photos.length === 0 ? (
+                        <div style={{ textAlign: 'center', color: '#666', padding: '2rem' }}>此相簿暫無照片</div>
+                    ) : (
+                        <div style={{
+                            columnCount: 3,
+                            columnGap: '1.5rem',
+                            // Responsive columns handled by media queries in style tag below
+                        }} className="masonry-grid">
+                            {photos.map((photo) => (
+                                <div key={photo.id} style={{
+                                    breakInside: 'avoid',
+                                    marginBottom: '1.5rem',
+                                    background: 'white',
+                                    borderRadius: '1rem',
+                                    overflow: 'hidden',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                    transition: 'transform 0.3s',
+                                }} className="hover:scale-[1.02]">
+                                    <img
+                                        src={photo.src}
+                                        alt={photo.alt || 'photo'}
+                                        style={{
+                                            width: '100%',
+                                            height: 'auto',
+                                            display: 'block',
+                                        }}
+                                    />
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
 
@@ -175,3 +235,4 @@ export default function AlbumDetail({ params }: { params: Promise<{ id: string }
         </div>
     );
 }
+

@@ -42,8 +42,8 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  /* 內文預設使用 ZCOOL XiaoWei (圓體) */
-  font-family: 'ZCOOL XiaoWei', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  /* 使用 Huninn (粉圓體) 作為主要字體 */
+  font-family: 'Huninn', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
   font-weight: 400;
   line-height: 1.8;
   -webkit-font-smoothing: antialiased;
@@ -52,32 +52,32 @@ body {
   letter-spacing: 0.02em;
 }
 
-/* 強制所有元素預設使用圓體 */
+/* 強制所有元素使用粉圓體 */
 * {
-  font-family: 'ZCOOL XiaoWei', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Huninn', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* 標題特別使用粉圓字體 (jf-openhuninn) */
+/* 標題使用粉圓體 */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  font-family: 'jf-openhuninn-2.0', 'ZCOOL XiaoWei', sans-serif !important;
+  font-family: 'Huninn', 'Noto Sans TC', sans-serif !important;
   font-weight: 700;
   margin: 0;
   line-height: 1.4;
   letter-spacing: 0.05em;
 }
 
-/* 內文使用圓體 */
+/* 內文使用粉圓體 */
 p,
 span,
 div,
 a,
 li {
-  font-family: 'ZCOOL XiaoWei', 'Noto Sans TC', sans-serif;
+  font-family: 'Huninn', 'Noto Sans TC', sans-serif;
   font-weight: 400;
   letter-spacing: 0.03em;
 }
@@ -196,4 +196,21 @@ p {
   html {
     font-size: 16px;
   }
+}
+
+/* Admin Panel Override */
+.admin-panel,
+.admin-panel * {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  letter-spacing: normal;
+}
+
+.admin-panel h1,
+.admin-panel h2,
+.admin-panel h3,
+.admin-panel h4,
+.admin-panel h5,
+.admin-panel h6 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  letter-spacing: normal;
 }

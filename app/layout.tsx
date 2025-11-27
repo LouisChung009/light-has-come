@@ -17,10 +17,10 @@ export default function RootLayout({
             <head>
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-                {/* 內文: ZCOOL XiaoWei (圓體) */}
-                <link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
-                {/* 標題: jf-openhuninn (粉圓) */}
-                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jf-openhuninn@2.1.0/font/jf-openhuninn.css" />
+                {/* Huninn (粉圓體) - Google Fonts 版本 */}
+                <link href="https://fonts.googleapis.com/css2?family=Huninn:wght@400;700&display=swap" rel="stylesheet" />
+                {/* Noto Sans TC 作為備用字體 */}
+                <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
             </head>
             <body>
                 {children}

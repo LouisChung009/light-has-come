@@ -1,11 +1,49 @@
 'use client';
 
-import { useState } from 'react';
+import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
-import { albums } from '../data/albums';
+import { useEffect, useState } from 'react';
+
+// Define types for our Supabase data
+interface Album {
+    id: string;
+    title: string;
+    date: string;
+    description: string;
+    category: string;
+    cover_color: string;
+    cover_photo_url?: string;
+    photos: { count: number }[];
+}
 
 export default function Gallery() {
     const [filter, setFilter] = useState('all');
+    const [albums, setAlbums] = useState<Album[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchAlbums() {
+            const supabase = createClient();
+
+            // Fetch albums with photo count
+            const { data, error } = await supabase
+                .from('albums')
+                .select(`
+                    *,
+                    photos:photos(count)
+                `)
+                .order('date', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching albums:', error);
+            } else {
+                setAlbums(data || []);
+            }
+            setLoading(false);
+        }
+
+        fetchAlbums();
+    }, []);
 
     const filteredAlbums = filter === 'all'
         ? albums
@@ -90,82 +128,88 @@ export default function Gallery() {
             {/* Album Grid */}
             <section style={{ padding: '4rem 1.5rem' }}>
                 <div className="container">
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                        gap: '2rem',
-                        marginBottom: '3rem'
-                    }}>
-                        {filteredAlbums.map(album => (
-                            <Link href={`/gallery/${album.id}`} key={album.id} style={{ textDecoration: 'none' }}>
-                                <div style={{
-                                    background: 'white',
-                                    borderRadius: '1rem',
-                                    overflow: 'hidden',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                                    transition: 'transform 0.3s, box-shadow 0.3s',
-                                    cursor: 'pointer',
-                                    height: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column'
-                                }}
-                                    className="hover:translate-y-[-8px] hover:shadow-lg"
-                                >
-                                    {/* Album Cover */}
+                    {loading ? (
+                        <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>載入中...</div>
+                    ) : filteredAlbums.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>目前沒有相關相簿</div>
+                    ) : (
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                            gap: '2rem',
+                            marginBottom: '3rem'
+                        }}>
+                            {filteredAlbums.map(album => (
+                                <Link href={`/gallery/${album.id}`} key={album.id} style={{ textDecoration: 'none' }}>
                                     <div style={{
-                                        aspectRatio: '4/3',
-                                        background: album.coverColor,
+                                        background: 'white',
+                                        borderRadius: '1rem',
+                                        overflow: 'hidden',
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                        transition: 'transform 0.3s, box-shadow 0.3s',
+                                        cursor: 'pointer',
+                                        height: '100%',
                                         display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '4rem',
-                                        position: 'relative'
-                                    }}>
-                                        {/* Stack effect */}
+                                        flexDirection: 'column'
+                                    }}
+                                        className="hover:translate-y-[-8px] hover:shadow-lg"
+                                    >
+                                        {/* Album Cover */}
                                         <div style={{
-                                            position: 'absolute',
-                                            top: '10px',
-                                            right: '10px',
-                                            background: 'rgba(0,0,0,0.5)',
-                                            color: 'white',
-                                            padding: '4px 8px',
-                                            borderRadius: '4px',
-                                            fontSize: '0.875rem',
-                                            fontWeight: 500
+                                            aspectRatio: '4/3',
+                                            background: album.cover_photo_url ? `url(${album.cover_photo_url}) center/cover no-repeat` : album.cover_color,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: '4rem',
+                                            position: 'relative'
                                         }}>
-                                            {album.photos.length} 張相片
-                                        </div>
-                                        <span>📷</span>
-                                    </div>
-
-                                    <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                        <div style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ fontSize: '0.875rem', color: '#999' }}>{album.date}</span>
-                                            <span style={{
-                                                display: 'inline-block',
-                                                padding: '2px 8px',
-                                                background: '#F5F5F5',
-                                                color: '#4A90C8',
-                                                borderRadius: '0.25rem',
-                                                fontSize: '0.75rem',
-                                                fontWeight: 600
+                                            {/* Stack effect */}
+                                            <div style={{
+                                                position: 'absolute',
+                                                top: '10px',
+                                                right: '10px',
+                                                background: 'rgba(0,0,0,0.5)',
+                                                color: 'white',
+                                                padding: '4px 8px',
+                                                borderRadius: '4px',
+                                                fontSize: '0.875rem',
+                                                fontWeight: 500
                                             }}>
-                                                {album.category === 'craft' ? '手作' :
-                                                    album.category === 'music' ? '音樂' :
-                                                        album.category === 'science' ? '科學' :
-                                                            album.category === 'outdoor' ? '戶外' : '特別活動'}
-                                            </span>
+                                                {album.photos?.[0]?.count || 0} 張相片
+                                            </div>
+                                            {!album.cover_photo_url && <span>📷</span>}
                                         </div>
-                                        <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', color: '#333' }}>{album.title}</h3>
-                                        <p style={{ color: '#666', fontSize: '0.875rem', marginBottom: '1rem', flex: 1 }}>{album.description}</p>
-                                        <div style={{ color: '#4A90C8', fontSize: '0.875rem', fontWeight: 600 }}>
-                                            查看相簿 →
+
+                                        <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                            <div style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span style={{ fontSize: '0.875rem', color: '#999' }}>{album.date}</span>
+                                                <span style={{
+                                                    display: 'inline-block',
+                                                    padding: '2px 8px',
+                                                    background: '#F5F5F5',
+                                                    color: '#4A90C8',
+                                                    borderRadius: '0.25rem',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 600
+                                                }}>
+                                                    {album.category === 'craft' ? '手作' :
+                                                        album.category === 'music' ? '音樂' :
+                                                            album.category === 'science' ? '科學' :
+                                                                album.category === 'outdoor' ? '戶外' : '特別活動'}
+                                                </span>
+                                            </div>
+                                            <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', color: '#333' }}>{album.title}</h3>
+                                            <p style={{ color: '#666', fontSize: '0.875rem', marginBottom: '1rem', flex: 1 }}>{album.description}</p>
+                                            <div style={{ color: '#4A90C8', fontSize: '0.875rem', fontWeight: 600 }}>
+                                                查看相簿 →
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
 
                     <div style={{
                         textAlign: 'center',
@@ -222,3 +266,4 @@ export default function Gallery() {
         </div>
     );
 }
+
