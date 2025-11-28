@@ -67,7 +67,7 @@ export default function SiteHeader() {
         .logo-link {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
           text-decoration: none;
           flex: 1 1 auto;
           justify-content: center;
@@ -76,8 +76,8 @@ export default function SiteHeader() {
 
         .logo-icon-wrapper {
           position: relative;
-          width: 40px;
-          height: 40px;
+          width: 32px;
+          height: 32px;
           flex-shrink: 0;
         }
 
@@ -85,37 +85,39 @@ export default function SiteHeader() {
           display: flex;
           flex-direction: column;
           justify-content: center;
-          line-height: 1;
+          line-height: 1.1;
           text-align: center;
+          gap: 1px;
         }
 
         .logo-title {
           font-family: 'Huninn', 'jf-openhuninn-2.0', sans-serif;
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 700;
           color: #333;
           margin: 0;
-          letter-spacing: 0.02em;
+          letter-spacing: 0.01em;
           white-space: nowrap;
         }
 
         .logo-subtitle {
           font-family: 'Noto Sans TC', sans-serif;
-          font-size: 11px;
+          font-size: 9px;
           font-weight: 700;
           color: #4A90C8;
           white-space: nowrap;
           margin: 0;
+          letter-spacing: 0.05em;
         }
 
         .logo-subtitle-full {
           font-family: 'Noto Sans TC', sans-serif;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 500;
           color: #666;
           white-space: nowrap;
           margin: 0;
-          margin-top: 2px;
+          letter-spacing: 0.02em;
         }
 
         /* Desktop container - hidden on mobile */
@@ -204,7 +206,7 @@ export default function SiteHeader() {
           border-radius: 9999px;
           text-decoration: none;
           font-weight: 700;
-          font-size: 12px;
+          font-size: 11px;
           white-space: nowrap;
           box-shadow: 0 2px 6px rgba(74, 144, 200, 0.2);
           flex-shrink: 0;
