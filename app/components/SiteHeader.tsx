@@ -45,12 +45,12 @@ export default function SiteHeader() {
         .header-container {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 0 1rem;
-          height: 64px;
+          padding: 0 0.75rem;
+          height: 56px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 1rem;
+          gap: 0.5rem;
           position: relative;
         }
 
@@ -60,14 +60,14 @@ export default function SiteHeader() {
           align-items: center;
           justify-content: space-between;
           width: 100%;
-          gap: 0.5rem;
+          gap: 8px;
         }
 
         /* Logo Styles */
         .logo-link {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 4px;
           text-decoration: none;
           flex: 1 1 auto;
           justify-content: center;
@@ -76,8 +76,8 @@ export default function SiteHeader() {
 
         .logo-icon-wrapper {
           position: relative;
-          width: 32px;
-          height: 32px;
+          width: 28px;
+          height: 28px;
           flex-shrink: 0;
         }
 
@@ -85,39 +85,42 @@ export default function SiteHeader() {
           display: flex;
           flex-direction: column;
           justify-content: center;
-          line-height: 1.1;
+          line-height: 1;
           text-align: center;
-          gap: 1px;
+          gap: 0px;
         }
 
         .logo-title {
           font-family: 'Huninn', 'jf-openhuninn-2.0', sans-serif;
-          font-size: 16px;
+          font-size: 14px;
           font-weight: 700;
           color: #333;
           margin: 0;
-          letter-spacing: 0.01em;
+          letter-spacing: 0em;
           white-space: nowrap;
+          line-height: 1.2;
         }
 
         .logo-subtitle {
           font-family: 'Noto Sans TC', sans-serif;
-          font-size: 9px;
+          font-size: 7px;
           font-weight: 700;
           color: #4A90C8;
           white-space: nowrap;
           margin: 0;
           letter-spacing: 0.05em;
+          line-height: 1;
         }
 
         .logo-subtitle-full {
           font-family: 'Noto Sans TC', sans-serif;
-          font-size: 9px;
+          font-size: 7px;
           font-weight: 500;
           color: #666;
           white-space: nowrap;
           margin: 0;
           letter-spacing: 0.02em;
+          line-height: 1;
         }
 
         /* Desktop container - hidden on mobile */
@@ -173,8 +176,8 @@ export default function SiteHeader() {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          width: 28px;
-          height: 18px;
+          width: 24px;
+          height: 16px;
           background: none;
           border: none;
           cursor: pointer;
@@ -202,21 +205,22 @@ export default function SiteHeader() {
           justify-content: center;
           background: #4A90C8;
           color: white;
-          padding: 6px 12px;
+          padding: 5px 10px;
           border-radius: 9999px;
           text-decoration: none;
           font-weight: 700;
-          font-size: 11px;
+          font-size: 10px;
           white-space: nowrap;
           box-shadow: 0 2px 6px rgba(74, 144, 200, 0.2);
           flex-shrink: 0;
+          line-height: 1.2;
         }
 
         /* Mobile Dropdown - hidden by default */
         .mobile-menu-dropdown {
           display: none;
           position: absolute;
-          top: 64px;
+          top: 56px;
           left: 0;
           width: 100%;
           background: white;
