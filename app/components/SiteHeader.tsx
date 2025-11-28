@@ -30,99 +30,278 @@ export default function SiteHeader() {
     pathname === href || (href !== '/' && pathname?.startsWith(href + '/'))
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100">
-      <div className="container mx-auto px-4 sm:px-6 h-[88px] flex items-center justify-between">
+    <>
+      <style jsx global>{`
+        .site-header {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          background: rgba(255, 255, 255, 0.98);
+          backdrop-filter: blur(10px);
+          box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+          border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .header-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 1.5rem;
+          height: 80px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
 
-        {/* Logo Section - Optimized Layout */}
-        <Link href="/" className="group flex items-center gap-3 no-underline">
-          {/* Icon */}
-          <div className="relative w-[52px] h-[52px] flex-shrink-0 transition-transform group-hover:scale-105 duration-300">
-            <Image
-              src="/logo.png"
-              alt="光·來了 Logo"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
+        /* Logo Styles */
+        .logo-link {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          text-decoration: none;
+        }
+        
+        .logo-icon-wrapper {
+          position: relative;
+          width: 48px;
+          height: 48px;
+          flex-shrink: 0;
+        }
+        
+        .logo-text-group {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          line-height: 1;
+        }
+        
+        .logo-title {
+          font-family: 'Huninn', 'jf-openhuninn-2.0', sans-serif;
+          font-size: 26px;
+          font-weight: 700;
+          color: #333;
+          margin-bottom: 4px;
+          letter-spacing: 0.02em;
+        }
+        
+        .logo-subtitle {
+          font-family: 'Noto Sans TC', sans-serif;
+          font-size: 13px;
+          font-weight: 700;
+          color: #4A90C8;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
 
-          {/* Text Stack - Closer to Reference */}
-          <div className="flex flex-col justify-center h-[52px]">
-            <h1 className="text-[1.75rem] leading-none font-bold text-gray-800 tracking-tight mb-1 font-['Huninn']">
-              光·來了
-            </h1>
-            <span className="text-[0.75rem] leading-none font-bold text-brand-blue tracking-widest uppercase font-['Noto_Sans_TC']">
-              Be Light Kids
-            </span>
-          </div>
-        </Link>
+        /* Desktop Nav */
+        .nav-desktop {
+          display: none; /* Hidden by default (mobile) */
+          align-items: center;
+          gap: 2rem;
+        }
+        
+        .nav-link {
+          color: #666;
+          text-decoration: none;
+          font-weight: 500;
+          font-size: 1rem;
+          transition: color 0.2s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+          color: #4A90C8;
+          font-weight: 700;
+        }
+        
+        .btn-register {
+          background: #4A90C8;
+          color: white;
+          padding: 0.6rem 1.5rem;
+          border-radius: 50px;
+          text-decoration: none;
+          font-weight: 700;
+          font-size: 0.95rem;
+          transition: all 0.2s;
+          box-shadow: 0 4px 10px rgba(74, 144, 200, 0.2);
+        }
+        
+        .btn-register:hover {
+          background: #2E5C8A;
+          transform: translateY(-1px);
+          box-shadow: 0 6px 15px rgba(74, 144, 200, 0.3);
+        }
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`text-[1rem] font-medium transition-colors duration-200 no-underline ${isActive(link.href)
-                  ? 'text-brand-blue font-bold'
-                  : 'text-gray-600 hover:text-brand-blue'
-                }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <Link
-            href="/register"
-            className="bg-brand-blue text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-md hover:bg-brand-deep-blue hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 no-underline"
-          >
-            預約體驗
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+          display: flex; /* Visible by default (mobile) */
+          flex-direction: column;
+          justify-content: space-between;
+          width: 24px;
+          height: 18px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0;
+          z-index: 101;
+        }
+        
+        .hamburger-line {
+          width: 100%;
+          height: 2px;
+          background-color: #333;
+          border-radius: 2px;
+          transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-btn.open .line-1 {
+          transform: rotate(45deg) translate(5px, 6px);
+        }
+        
+        .mobile-menu-btn.open .line-2 {
+          opacity: 0;
+        }
+        
+        .mobile-menu-btn.open .line-3 {
+          transform: rotate(-45deg) translate(5px, -6px);
+        }
+
+        /* Mobile Dropdown */
+        .mobile-menu-dropdown {
+          display: block; /* Visible structure for mobile */
+          position: absolute;
+          top: 80px;
+          left: 0;
+          width: 100%;
+          background: white;
+          border-bottom: 1px solid #eee;
+          box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+          overflow: hidden;
+          max-height: 0;
+          transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+          opacity: 0;
+        }
+        
+        .mobile-menu-dropdown.open {
+          max-height: 400px;
+          opacity: 1;
+        }
+        
+        .mobile-nav-list {
+          display: flex;
+          flex-direction: column;
+          padding: 1rem;
+        }
+        
+        .mobile-nav-link {
+          display: block;
+          padding: 1rem;
+          text-decoration: none;
+          color: #333;
+          font-weight: 500;
+          border-radius: 8px;
+          transition: background 0.2s;
+        }
+        
+        .mobile-nav-link:hover {
+          background: #f5f5f5;
+        }
+        
+        .mobile-nav-link.active {
+          color: #4A90C8;
+          background: #F0F9FF;
+          font-weight: 700;
+        }
+        
+        .mobile-register-btn {
+          display: block;
+          text-align: center;
+          background: #4A90C8;
+          color: white;
+          padding: 0.8rem;
+          margin: 1rem;
+          border-radius: 50px;
+          text-decoration: none;
+          font-weight: 700;
+        }
+
+        /* Responsive Breakpoints */
+        @media (min-width: 768px) {
+          .nav-desktop { display: flex; }
+          .mobile-menu-btn { display: none; }
+          .mobile-menu-dropdown { display: none; }
+        }
+      `}</style>
+
+      <header className="site-header">
+        <div className="header-container">
+
+          {/* Logo Section */}
+          <Link href="/" className="logo-link">
+            <div className="logo-icon-wrapper">
+              <Image
+                src="/logo.png"
+                alt="光·來了 Logo"
+                fill
+                style={{ objectFit: 'contain' }}
+                priority
+              />
+            </div>
+            <div className="logo-text-group">
+              <span className="logo-title">光·來了</span>
+              <span className="logo-subtitle">Be Light Kids</span>
+            </div>
           </Link>
-        </nav>
 
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden p-2 text-gray-600 hover:text-brand-blue transition-colors focus:outline-none"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          <div className="w-6 h-5 relative flex flex-col justify-between">
-            <span className={`w-full h-0.5 bg-current rounded-full transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-2.5' : ''}`} />
-            <span className={`w-full h-0.5 bg-current rounded-full transition-all duration-300 ${isMenuOpen ? 'opacity-0' : 'opacity-100'}`} />
-            <span className={`w-full h-0.5 bg-current rounded-full transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-          </div>
-        </button>
-      </div>
-
-      {/* Mobile Navigation Dropdown */}
-      <div
-        className={`md:hidden absolute top-[88px] left-0 w-full bg-white border-b border-gray-100 shadow-lg transition-all duration-300 ease-in-out overflow-hidden ${isMenuOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'
-          }`}
-      >
-        <nav className="flex flex-col p-4 space-y-2">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors no-underline ${isActive(link.href)
-                  ? 'bg-brand-blue/10 text-brand-blue font-bold'
-                  : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {link.label}
+          {/* Desktop Navigation */}
+          <nav className="nav-desktop">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`nav-link ${isActive(link.href) ? 'active' : ''}`}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link href="/register" className="btn-register">
+              預約體驗
             </Link>
-          ))}
-          <div className="pt-2 pb-2 px-4">
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            className={`mobile-menu-btn ${isMenuOpen ? 'open' : ''}`}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <span className="hamburger-line line-1" />
+            <span className="hamburger-line line-2" />
+            <span className="hamburger-line line-3" />
+          </button>
+        </div>
+
+        {/* Mobile Dropdown */}
+        <div className={`mobile-menu-dropdown ${isMenuOpen ? 'open' : ''}`}>
+          <nav className="mobile-nav-list">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`mobile-nav-link ${isActive(link.href) ? 'active' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
             <Link
               href="/register"
-              className="block w-full text-center bg-brand-blue text-white py-3 rounded-full font-bold shadow-md active:scale-95 transition-transform no-underline"
+              className="mobile-register-btn"
               onClick={() => setIsMenuOpen(false)}
             >
               預約體驗
             </Link>
-          </div>
-        </nav>
-      </div>
-    </header>
+          </nav>
+        </div>
+      </header>
+    </>
   )
 }
