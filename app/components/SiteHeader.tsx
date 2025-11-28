@@ -45,8 +45,8 @@ export default function SiteHeader() {
         .header-container {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 0 1rem; /* Reduced padding for mobile */
-          height: 72px; /* Slightly shorter for mobile */
+          padding: 0 1rem;
+          height: 64px; /* Compact height for mobile */
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -56,14 +56,15 @@ export default function SiteHeader() {
         .logo-link {
           display: flex;
           align-items: center;
-          gap: 8px; /* Closer gap as requested */
+          gap: 6px; /* Very tight gap */
           text-decoration: none;
+          flex-shrink: 0;
         }
         
         .logo-icon-wrapper {
           position: relative;
-          width: 40px; /* Smaller icon for mobile */
-          height: 40px;
+          width: 36px; /* Compact icon */
+          height: 36px;
           flex-shrink: 0;
         }
         
@@ -76,27 +77,29 @@ export default function SiteHeader() {
         
         .logo-title {
           font-family: 'Huninn', 'jf-openhuninn-2.0', sans-serif;
-          font-size: 22px; /* Smaller title for mobile */
+          font-size: 20px; /* Compact title */
           font-weight: 700;
           color: #333;
-          margin-bottom: 2px;
+          margin-bottom: 1px;
           letter-spacing: 0.02em;
           white-space: nowrap;
         }
         
         .logo-subtitle {
           font-family: 'Noto Sans TC', sans-serif;
-          font-size: 11px; /* Smaller subtitle for mobile */
+          font-size: 10px;
           font-weight: 700;
           color: #4A90C8;
           letter-spacing: 0.05em;
           text-transform: uppercase;
           white-space: nowrap;
+          transform: scale(0.95);
+          transform-origin: left;
         }
 
         /* Desktop Nav */
         .nav-desktop {
-          display: none; /* Hidden by default (mobile) */
+          display: none;
           align-items: center;
           gap: 2rem;
         }
@@ -132,19 +135,41 @@ export default function SiteHeader() {
           box-shadow: 0 6px 15px rgba(74, 144, 200, 0.3);
         }
 
+        /* Mobile Actions (Right Side) */
+        .mobile-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        /* Mobile Register Button (Header) */
+        .mobile-header-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #4A90C8; /* Red in reference, but keeping brand blue */
+          color: white;
+          padding: 6px 14px;
+          border-radius: 50px;
+          text-decoration: none;
+          font-weight: 700;
+          font-size: 13px;
+          white-space: nowrap;
+          box-shadow: 0 2px 6px rgba(74, 144, 200, 0.2);
+        }
+
         /* Mobile Menu Button */
         .mobile-menu-btn {
-          display: flex; /* Visible by default (mobile) */
+          display: flex;
           flex-direction: column;
           justify-content: space-between;
-          width: 24px;
-          height: 18px;
+          width: 22px;
+          height: 16px;
           background: none;
           border: none;
           cursor: pointer;
           padding: 0;
           z-index: 101;
-          margin-left: 10px;
         }
         
         .hamburger-line {
@@ -156,22 +181,22 @@ export default function SiteHeader() {
         }
         
         .mobile-menu-btn.open .line-1 {
-          transform: rotate(45deg) translate(5px, 6px);
+          transform: rotate(45deg) translate(5px, 5px);
         }
         
         .mobile-menu-btn.open .line-2 {
           opacity: 0;
         }
         
-.mobile-menu-btn.open .line-3 {
-          transform: rotate(-45deg) translate(5px, -6px);
+        .mobile-menu-btn.open .line-3 {
+          transform: rotate(-45deg) translate(5px, -5px);
         }
 
         /* Mobile Dropdown */
         .mobile-menu-dropdown {
-          display: block; /* Visible structure for mobile */
+          display: block;
           position: absolute;
-          top: 72px; /* Match header height */
+          top: 64px;
           left: 0;
           width: 100%;
           background: white;
@@ -191,7 +216,7 @@ export default function SiteHeader() {
         .mobile-nav-list {
           display: flex;
           flex-direction: column;
-          padding: 1rem;
+          padding: 0.5rem 1rem 1.5rem;
         }
         
         .mobile-nav-link {
@@ -200,29 +225,16 @@ export default function SiteHeader() {
           text-decoration: none;
           color: #333;
           font-weight: 500;
-          border-radius: 8px;
-          transition: background 0.2s;
+          border-bottom: 1px solid #f5f5f5;
+          transition: color 0.2s;
         }
         
-        .mobile-nav-link:hover {
-          background: #f5f5f5;
+        .mobile-nav-link:last-child {
+          border-bottom: none;
         }
         
-        .mobile-nav-link.active {
+        .mobile-nav-link:hover, .mobile-nav-link.active {
           color: #4A90C8;
-          background: #F0F9FF;
-          font-weight: 700;
-        }
-        
-        .mobile-register-btn {
-          display: block;
-          text-align: center;
-          background: #4A90C8;
-          color: white;
-          padding: 0.8rem;
-          margin: 1rem;
-          border-radius: 50px;
-          text-decoration: none;
           font-weight: 700;
         }
 
@@ -249,10 +261,11 @@ export default function SiteHeader() {
           
           .logo-subtitle {
             font-size: 13px;
+            transform: none;
           }
 
           .nav-desktop { display: flex; }
-          .mobile-menu-btn { display: none; }
+          .mobile-actions { display: none; } /* Hide mobile actions on desktop */
           .mobile-menu-dropdown { display: none; }
         }
       `}</style>
@@ -293,16 +306,22 @@ export default function SiteHeader() {
             </Link>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <button
-            className={`mobile-menu-btn ${isMenuOpen ? 'open' : ''}`}
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <span className="hamburger-line line-1" />
-            <span className="hamburger-line line-2" />
-            <span className="hamburger-line line-3" />
-          </button>
+          {/* Mobile Actions (Button + Menu) */}
+          <div className="mobile-actions">
+            <Link href="/register" className="mobile-header-btn">
+              預約體驗
+            </Link>
+
+            <button
+              className={`mobile-menu-btn ${isMenuOpen ? 'open' : ''}`}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              <span className="hamburger-line line-1" />
+              <span className="hamburger-line line-2" />
+              <span className="hamburger-line line-3" />
+            </button>
+          </div>
         </div>
 
         {/* Mobile Dropdown */}
@@ -318,13 +337,6 @@ export default function SiteHeader() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/register"
-              className="mobile-register-btn"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              預約體驗
-            </Link>
           </nav>
         </div>
       </header>
