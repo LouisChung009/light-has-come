@@ -46,24 +46,36 @@ export default function SiteHeader() {
           max-width: 1200px;
           margin: 0 auto;
           padding: 0 1rem;
-          height: 64px; /* Compact height for mobile */
+          height: auto;
           display: flex;
           align-items: center;
           justify-content: space-between;
+          gap: 1rem;
+        }
+
+        /* Mobile Header (Default) */
+        .header-mobile-layout {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          gap: 0.5rem;
         }
 
         /* Logo Styles */
         .logo-link {
           display: flex;
           align-items: center;
-          gap: 6px; /* Very tight gap */
+          gap: 6px;
           text-decoration: none;
           flex-shrink: 0;
+          flex-grow: 1;
+          justify-content: center;
         }
         
         .logo-icon-wrapper {
           position: relative;
-          width: 36px; /* Compact icon */
+          width: 36px;
           height: 36px;
           flex-shrink: 0;
         }
@@ -73,14 +85,16 @@ export default function SiteHeader() {
           flex-direction: column;
           justify-content: center;
           line-height: 1;
+          text-align: center;
         }
         
         .logo-title {
           font-family: 'Huninn', 'jf-openhuninn-2.0', sans-serif;
-          font-size: 20px; /* Compact title */
+          font-size: 18px;
           font-weight: 700;
           color: #333;
-          margin-bottom: 1px;
+          margin: 0;
+          margin-bottom: 0px;
           letter-spacing: 0.02em;
           white-space: nowrap;
         }
@@ -93,8 +107,18 @@ export default function SiteHeader() {
           letter-spacing: 0.05em;
           text-transform: uppercase;
           white-space: nowrap;
-          transform: scale(0.95);
-          transform-origin: left;
+          margin: 0;
+        }
+
+        .logo-subtitle-full {
+          font-family: 'Noto Sans TC', sans-serif;
+          font-size: 8px;
+          font-weight: 500;
+          color: #666;
+          letter-spacing: 0.02em;
+          white-space: nowrap;
+          margin: 0;
+          margin-top: 2px;
         }
 
         /* Desktop Nav */
@@ -135,29 +159,6 @@ export default function SiteHeader() {
           box-shadow: 0 6px 15px rgba(74, 144, 200, 0.3);
         }
 
-        /* Mobile Actions (Right Side) */
-        .mobile-actions {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        /* Mobile Register Button (Header) */
-        .mobile-header-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #4A90C8; /* Red in reference, but keeping brand blue */
-          color: white;
-          padding: 6px 14px;
-          border-radius: 50px;
-          text-decoration: none;
-          font-weight: 700;
-          font-size: 13px;
-          white-space: nowrap;
-          box-shadow: 0 2px 6px rgba(74, 144, 200, 0.2);
-        }
-
         /* Mobile Menu Button */
         .mobile-menu-btn {
           display: flex;
@@ -170,6 +171,7 @@ export default function SiteHeader() {
           cursor: pointer;
           padding: 0;
           z-index: 101;
+          flex-shrink: 0;
         }
         
         .hamburger-line {
@@ -192,11 +194,28 @@ export default function SiteHeader() {
           transform: rotate(-45deg) translate(5px, -5px);
         }
 
+        /* Mobile Register Button */
+        .mobile-header-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #4A90C8;
+          color: white;
+          padding: 6px 12px;
+          border-radius: 50px;
+          text-decoration: none;
+          font-weight: 700;
+          font-size: 12px;
+          white-space: nowrap;
+          box-shadow: 0 2px 6px rgba(74, 144, 200, 0.2);
+          flex-shrink: 0;
+        }
+
         /* Mobile Dropdown */
         .mobile-menu-dropdown {
           display: block;
           position: absolute;
-          top: 64px;
+          top: 100%;
           left: 0;
           width: 100%;
           background: white;
@@ -241,12 +260,19 @@ export default function SiteHeader() {
         /* Responsive Breakpoints */
         @media (min-width: 768px) {
           .header-container {
-            padding: 0 1.5rem;
             height: 88px;
+            padding: 0 1.5rem;
+            justify-content: space-between;
           }
           
+          .header-mobile-layout {
+            display: none;
+          }
+
           .logo-link {
             gap: 10px;
+            flex-grow: 0;
+            justify-content: flex-start;
           }
 
           .logo-icon-wrapper {
@@ -261,19 +287,59 @@ export default function SiteHeader() {
           
           .logo-subtitle {
             font-size: 13px;
-            transform: none;
+          }
+
+          .logo-subtitle-full {
+            display: none;
           }
 
           .nav-desktop { display: flex; }
-          .mobile-actions { display: none; } /* Hide mobile actions on desktop */
+          .mobile-menu-btn { display: none; }
+          .mobile-header-btn { display: none; }
           .mobile-menu-dropdown { display: none; }
         }
       `}</style>
 
       <header className="site-header">
         <div className="header-container">
+          {/* Mobile Layout */}
+          <div className="header-mobile-layout">
+            {/* Left: Menu Button */}
+            <button
+              className={`mobile-menu-btn ${isMenuOpen ? 'open' : ''}`}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              <span className="hamburger-line line-1" />
+              <span className="hamburger-line line-2" />
+              <span className="hamburger-line line-3" />
+            </button>
 
-          {/* Logo Section */}
+            {/* Center: Logo */}
+            <Link href="/" className="logo-link">
+              <div className="logo-icon-wrapper">
+                <Image
+                  src="/logo.png"
+                  alt="光·來了 Logo"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                  priority
+                />
+              </div>
+              <div className="logo-text-group">
+                <span className="logo-title">光·來了</span>
+                <span className="logo-subtitle">Be Light Kids</span>
+                <span className="logo-subtitle-full">大里思恩堂兒童主日學</span>
+              </div>
+            </Link>
+
+            {/* Right: Register Button */}
+            <Link href="/register" className="mobile-header-btn">
+              預約
+            </Link>
+          </div>
+
+          {/* Desktop Layout */}
           <Link href="/" className="logo-link">
             <div className="logo-icon-wrapper">
               <Image
@@ -305,13 +371,33 @@ export default function SiteHeader() {
               預約體驗
             </Link>
           </nav>
+        </div>
 
-          {/* Mobile Actions (Button + Menu) */}
-          <div className="mobile-actions">
-            <Link href="/register" className="mobile-header-btn">
-              預約體驗
-            </Link>
+        {/* Mobile Dropdown Menu */}
+        <div className={`mobile-menu-dropdown ${isMenuOpen ? 'open' : ''}`}>
+          <nav className="mobile-nav-list">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`mobile-nav-link ${isActive(link.href) ? 'active' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      </header>
+    </>
+  )
+}
 
+      <header className="site-header">
+        <div className="header-container">
+          {/* Mobile Layout */}
+          <div className="header-mobile-layout">
+            {/* Left: Menu Button */}
             <button
               className={`mobile-menu-btn ${isMenuOpen ? 'open' : ''}`}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -321,10 +407,66 @@ export default function SiteHeader() {
               <span className="hamburger-line line-2" />
               <span className="hamburger-line line-3" />
             </button>
+
+            {/* Center: Logo */}
+            <Link href="/" className="logo-link">
+              <div className="logo-icon-wrapper">
+                <Image
+                  src="/logo.png"
+                  alt="光·來了 Logo"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                  priority
+                />
+              </div>
+              <div className="logo-text-group">
+                <span className="logo-title">光·來了</span>
+                <span className="logo-subtitle">Be Light Kids</span>
+                <span className="logo-subtitle-full">大里思恩堂兒童主日學</span>
+              </div>
+            </Link>
+
+            {/* Right: Register Button */}
+            <Link href="/register" className="mobile-header-btn">
+              預約
+            </Link>
           </div>
+
+          {/* Desktop Layout */}
+          <Link href="/" className="logo-link">
+            <div className="logo-icon-wrapper">
+              <Image
+                src="/logo.png"
+                alt="光·來了 Logo"
+                fill
+                style={{ objectFit: 'contain' }}
+                priority
+              />
+            </div>
+            <div className="logo-text-group">
+              <span className="logo-title">光·來了</span>
+              <span className="logo-subtitle">Be Light Kids</span>
+            </div>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="nav-desktop">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`nav-link ${isActive(link.href) ? 'active' : ''}`}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link href="/register" className="btn-register">
+              預約體驗
+            </Link>
+          </nav>
         </div>
 
-        {/* Mobile Dropdown */}
+        {/* Mobile Dropdown Menu */}
         <div className={`mobile-menu-dropdown ${isMenuOpen ? 'open' : ''}`}>
           <nav className="mobile-nav-list">
             {NAV_LINKS.map((link) => (
