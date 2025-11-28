@@ -11,14 +11,6 @@ export default async function ContentManagement() {
         redirect('/admin')
     }
 
-    const { data: contents } = await supabase
-        .from('site_content')
-        .select('*')
-        .order('category', { ascending: true })
-        .order('section', { ascending: true })
-        .order('display_order', { ascending: true })
-
-    // Group by category and section
     type ContentItem = {
         id: string
         category: string
@@ -28,7 +20,16 @@ export default async function ContentManagement() {
         content_type: string
     }
 
-    const groupedContents = contents?.reduce((acc, item) => {
+    const { data: contents } = await supabase
+        .from('site_content')
+        .select('*')
+        .order('category', { ascending: true })
+        .order('section', { ascending: true })
+        .order('display_order', { ascending: true })
+        .returns<ContentItem[]>()
+
+    // Group by category and section
+    const groupedContents: Record<string, ContentItem[]> = (contents ?? []).reduce((acc, item) => {
         const key = `${item.category}::${item.section || 'general'}`
         if (!acc[key]) {
             acc[key] = []
@@ -79,7 +80,7 @@ export default async function ContentManagement() {
                 </Link>
             </div>
 
-            {Object.entries(groupedContents || {}).map(([key, items]) => {
+            {Object.entries(groupedContents).map(([key, items]) => {
                 const [category, section] = key.split('::')
                 return (
                     <div key={key} style={{ marginBottom: '3rem' }}>

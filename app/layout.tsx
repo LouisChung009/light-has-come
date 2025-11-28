@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import SiteHeader from "./components/SiteHeader";
 
 export const metadata: Metadata = {
     title: "光·來了 | 大里思恩堂兒童主日學",
@@ -24,6 +25,7 @@ export default function RootLayout({
                 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
             </head>
             <body>
+                <SiteHeader />
                 {children}
             </body>
         </html>

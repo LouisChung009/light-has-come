@@ -93,33 +93,6 @@ export default function Register() {
     if (isSuccess) {
         return (
             <div style={{ minHeight: '100vh', background: '#F5F5F5' }}>
-                {/* Header */}
-                <header style={{ background: 'white', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', position: 'sticky', top: 0, zIndex: 100 }}>
-                    <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem' }}>
-                        <Link href="/" style={{ textDecoration: 'none' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <h1 style={{ fontSize: '1.5rem', color: '#333', margin: 0 }}>光·來了</h1>
-                                <span style={{ fontSize: '0.875rem', color: '#666' }}>大里思恩堂兒童主日學</span>
-                            </div>
-                        </Link>
-                        <nav style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                            <Link href="/" style={{ color: '#333', textDecoration: 'none', fontWeight: 500 }}>首頁</Link>
-                            <Link href="/courses" style={{ color: '#333', textDecoration: 'none', fontWeight: 500 }}>課程介紹</Link>
-                            <Link href="/gallery" style={{ color: '#333', textDecoration: 'none', fontWeight: 500 }}>活動花絮</Link>
-                            <Link href="/about" style={{ color: '#333', textDecoration: 'none', fontWeight: 500 }}>關於我們</Link>
-                            <Link href="/register" style={{
-                                background: '#4A90C8',
-                                color: 'white',
-                                padding: '0.5rem 1.25rem',
-                                borderRadius: '9999px',
-                                textDecoration: 'none',
-                                fontWeight: 600,
-                                fontSize: '0.875rem'
-                            }}>預約體驗</Link>
-                        </nav>
-                    </div>
-                </header>
-
                 <div className="container" style={{ padding: '4rem 1.5rem', textAlign: 'center' }}>
                     <div style={{ background: 'white', padding: '3rem', borderRadius: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', maxWidth: '600px', margin: '0 auto' }}>
                         <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎉</div>
@@ -187,33 +160,6 @@ export default function Register() {
 
     return (
         <div style={{ minHeight: '100vh', background: '#F5F5F5' }}>
-            {/* Header */}
-            <header style={{ background: 'white', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', position: 'sticky', top: 0, zIndex: 100 }}>
-                <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem' }}>
-                    <Link href="/" style={{ textDecoration: 'none' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <h1 style={{ fontSize: '1.5rem', color: '#333', margin: 0 }}>光·來了</h1>
-                            <span style={{ fontSize: '0.875rem', color: '#666' }}>大里思恩堂兒童主日學</span>
-                        </div>
-                    </Link>
-                    <nav style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                        <Link href="/" style={{ color: '#333', textDecoration: 'none', fontWeight: 500 }}>首頁</Link>
-                        <Link href="/courses" style={{ color: '#333', textDecoration: 'none', fontWeight: 500 }}>課程介紹</Link>
-                        <Link href="/gallery" style={{ color: '#333', textDecoration: 'none', fontWeight: 500 }}>活動花絮</Link>
-                        <Link href="/about" style={{ color: '#333', textDecoration: 'none', fontWeight: 500 }}>關於我們</Link>
-                        <Link href="/register" style={{
-                            background: '#4A90C8',
-                            color: 'white',
-                            padding: '0.5rem 1.25rem',
-                            borderRadius: '9999px',
-                            textDecoration: 'none',
-                            fontWeight: 600,
-                            fontSize: '0.875rem'
-                        }}>預約體驗</Link>
-                    </nav>
-                </div>
-            </header>
-
             {/* Form Section */}
             <section style={{ padding: '4rem 1.5rem' }}>
                 <div className="container" style={{ maxWidth: '800px', margin: '0 auto' }}>

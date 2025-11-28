@@ -27,14 +27,14 @@ export async function createAlbum(formData: FormData) {
         })
 
     if (error) {
-        return { error: error.message }
+        throw new Error(error.message)
     }
 
     revalidatePath('/admin/gallery')
     redirect('/admin/gallery')
 }
 
-export async function deleteAlbum(id: string) {
+export async function deleteAlbum(id: string): Promise<void> {
     const supabase = await createClient()
 
     const { error } = await supabase
@@ -43,10 +43,11 @@ export async function deleteAlbum(id: string) {
         .eq('id', id)
 
     if (error) {
-        return { error: error.message }
+        throw new Error(error.message)
     }
 
     revalidatePath('/admin/gallery')
+    revalidatePath('/gallery')
 }
 
 export async function uploadPhoto(formData: FormData) {

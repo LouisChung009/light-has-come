@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">光·來了 Logo</title>
+  <desc id="desc">A glowing yellow smile with a cross accent</desc>
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="42%" r="58%">
+      <stop offset="0%" stop-color="#ffd93d" stop-opacity="0.9" />
+      <stop offset="35%" stop-color="#ffd93d" stop-opacity="0.55" />
+      <stop offset="75%" stop-color="#ffd93d" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#ffd93d" stop-opacity="0" />
+    </radialGradient>
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="18" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="outline" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ffd93d" flood-opacity="0.75" />
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" fill="transparent" />
+  <circle cx="256" cy="250" r="210" fill="url(#glow)" />
+
+  <g filter="url(#softGlow)" stroke="#ffd93d" stroke-linecap="round" stroke-linejoin="round">
+    <path
+      d="M340 96c0-16 8-29 23-32s31 5 34 19c3 12-5 24-18 25l-22 2-23 76c-4 13-16 20-29 18-13-3-20-14-17-27l21-81Z"
+      fill="#ffd93d"
+      opacity="0.85"
+    />
+    <path
+      d="M374 125c32 7 54 24 54 55 0 93-75 183-176 183-101 0-164-70-164-154 0-85 78-158 183-165l-27 96c-2 7 3 14 11 15l119 1Z"
+      fill="none"
+      stroke-width="24"
+    />
+    <path
+      d="M398 268c0 72-63 126-140 126s-136-58-136-126c0-92 78-150 168-150 36 0 83 17 101 45"
+      fill="none"
+      stroke-width="20"
+      opacity="0.9"
+    />
+  </g>
+
+  <g fill="#ffd93d" filter="url(#outline)">
+    <circle cx="220" cy="240" r="16" />
+    <circle cx="304" cy="240" r="16" />
+    <path d="M224 300c16 22 36 32 64 32s48-10 64-32" fill="none" stroke="#ffd93d" stroke-width="18" stroke-linecap="round" />
+  </g>
+</svg>

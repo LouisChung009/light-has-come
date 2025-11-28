@@ -16,7 +16,7 @@ export async function login(formData: FormData) {
     })
 
     if (error) {
-        return { error: error.message }
+        redirect(`/admin?message=${encodeURIComponent(error.message)}`)
     }
 
     revalidatePath('/admin', 'layout')
