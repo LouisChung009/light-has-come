@@ -80,7 +80,7 @@ export default async function ContentManagement() {
                 </Link>
             </div>
 
-            {Object.entries(groupedContents).map(([key, items]) => {
+            {Object.entries(groupedContents).map(([key, items]: [string, ContentItem[]]) => {
                 const [category, section] = key.split('::')
                 return (
                     <div key={key} style={{ marginBottom: '3rem' }}>

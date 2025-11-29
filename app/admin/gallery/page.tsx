@@ -15,19 +15,34 @@ export default async function AdminGallery() {
         <div style={{ padding: '2rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1 style={{ fontSize: '1.75rem', color: '#333', margin: 0 }}>相簿管理</h1>
-                <Link href="/admin/gallery/new" style={{
-                    background: '#4A90C8',
-                    color: 'white',
-                    padding: '0.75rem 1.5rem',
-                    borderRadius: '0.5rem',
-                    textDecoration: 'none',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                }}>
-                    + 新增相簿
-                </Link>
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <Link href="/admin/gallery/bulk-import" style={{
+                        background: '#1E293B',
+                        color: 'white',
+                        padding: '0.75rem 1.25rem',
+                        borderRadius: '0.5rem',
+                        textDecoration: 'none',
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem'
+                    }}>
+                        ⚡ 批次匯入
+                    </Link>
+                    <Link href="/admin/gallery/new" style={{
+                        background: '#4A90C8',
+                        color: 'white',
+                        padding: '0.75rem 1.5rem',
+                        borderRadius: '0.5rem',
+                        textDecoration: 'none',
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                    }}>
+                        + 新增相簿
+                    </Link>
+                </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>

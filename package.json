@@ -6,11 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "import-gallery": "node scripts/import-gallery.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.86.0",
+    "jszip": "^3.10.1",
     "next": "16.0.3",
     "react": "19.2.0",
     "react-dom": "19.2.0"
