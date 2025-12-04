@@ -6,3 +6,4 @@ export const CHANGES = [
     '活動花絮頁面 Footer 改為讀取聯絡資訊',
     '課程介紹頁面使用共用 Footer 組件'
 ]
+// Deployment trigger: 1764864454
