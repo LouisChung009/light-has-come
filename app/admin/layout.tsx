@@ -64,6 +64,14 @@ export default async function AdminLayout({
                     }}>
                         📝 文案管理
                     </Link>
+                    <Link href="/admin/categories" style={{
+                        padding: '0.75rem 1rem',
+                        color: 'rgba(255,255,255,0.8)',
+                        textDecoration: 'none',
+                        borderRadius: '0.5rem',
+                    }}>
+                        🏷️ 分類管理
+                    </Link>
                     <Link href="/" target="_blank" style={{
                         padding: '0.75rem 1rem',
                         color: 'rgba(255,255,255,0.8)',

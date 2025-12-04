@@ -3,10 +3,14 @@ import Link from 'next/link'
 import UploadPhotoForm from './UploadPhotoForm'
 import DeletePhotoButton from './DeletePhotoButton'
 import SetCoverButton from './SetCoverButton'
+import EditAlbumForm from './EditAlbumForm'
+
+import { getCategories } from '../../categories/actions'
 
 export default async function AlbumDetail({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
     const supabase = await createClient()
+    const categories = await getCategories()
 
     const { data: album } = await supabase
         .from('albums')
@@ -30,9 +34,7 @@ export default async function AlbumDetail({ params }: { params: Promise<{ id: st
                 <Link href="/admin/gallery" style={{ textDecoration: 'none', color: '#666' }}>
                     ← 返回列表
                 </Link>
-                <h1 style={{ fontSize: '1.75rem', color: '#333', margin: 0 }}>
-                    {album.title}
-                </h1>
+                <EditAlbumForm album={album} categories={categories} />
                 <span style={{ background: '#f1f5f9', padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.875rem' }}>
                     {photos?.length || 0} 張照片
                 </span>

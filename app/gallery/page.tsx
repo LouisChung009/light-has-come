@@ -16,17 +16,35 @@ interface Album {
     photos: { count: number }[];
 }
 
+interface Category {
+    id: string;
+    label: string;
+    value: string;
+    sort_order: number;
+}
+
 export default function Gallery() {
     const [filter, setFilter] = useState('all');
     const [albums, setAlbums] = useState<Album[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        async function fetchAlbums() {
+        async function fetchData() {
             const supabase = createClient();
 
+            // Fetch categories
+            const { data: categoriesData } = await supabase
+                .from('album_categories')
+                .select('*')
+                .order('sort_order', { ascending: true });
+
+            if (categoriesData) {
+                setCategories(categoriesData);
+            }
+
             // Fetch albums with photo count
-            const { data, error } = await supabase
+            const { data: albumsData, error } = await supabase
                 .from('albums')
                 .select(`
                     *,
@@ -37,17 +55,23 @@ export default function Gallery() {
             if (error) {
                 console.error('Error fetching albums:', error);
             } else {
-                setAlbums(data || []);
+                setAlbums(albumsData || []);
             }
             setLoading(false);
         }
 
-        fetchAlbums();
+        fetchData();
     }, []);
 
     const filteredAlbums = filter === 'all'
         ? albums
         : albums.filter(album => album.category === filter);
+
+    // Helper to get category label
+    const getCategoryLabel = (value: string) => {
+        const cat = categories.find(c => c.value === value);
+        return cat ? cat.label : value;
+    };
 
     return (
         <div style={{ minHeight: '100vh', background: '#F5F5F5' }}>
@@ -69,22 +93,31 @@ export default function Gallery() {
             <section style={{ background: 'white', padding: '2rem 1.5rem', borderBottom: '1px solid #eee' }}>
                 <div className="container">
                     <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        {[
-                            { id: 'all', label: '全部活動' },
-                            { id: 'craft', label: '手作' },
-                            { id: 'music', label: '音樂' },
-                            { id: 'science', label: '科學' },
-                            { id: 'outdoor', label: '戶外' },
-                            { id: 'special', label: '特別活動' },
-                        ].map(btn => (
+                        <button
+                            onClick={() => setFilter('all')}
+                            style={{
+                                padding: '0.5rem 1.5rem',
+                                border: `2px solid ${filter === 'all' ? '#4A90C8' : '#eee'}`,
+                                background: filter === 'all' ? '#4A90C8' : 'white',
+                                color: filter === 'all' ? 'white' : '#333',
+                                borderRadius: '0.5rem',
+                                cursor: 'pointer',
+                                fontWeight: 500,
+                                transition: 'all 0.3s',
+                                fontSize: '0.9rem'
+                            }}
+                        >
+                            全部活動
+                        </button>
+                        {categories.map(cat => (
                             <button
-                                key={btn.id}
-                                onClick={() => setFilter(btn.id)}
+                                key={cat.id}
+                                onClick={() => setFilter(cat.value)}
                                 style={{
                                     padding: '0.5rem 1.5rem',
-                                    border: `2px solid ${filter === btn.id ? '#4A90C8' : '#eee'}`,
-                                    background: filter === btn.id ? '#4A90C8' : 'white',
-                                    color: filter === btn.id ? 'white' : '#333',
+                                    border: `2px solid ${filter === cat.value ? '#4A90C8' : '#eee'}`,
+                                    background: filter === cat.value ? '#4A90C8' : 'white',
+                                    color: filter === cat.value ? 'white' : '#333',
                                     borderRadius: '0.5rem',
                                     cursor: 'pointer',
                                     fontWeight: 500,
@@ -92,7 +125,7 @@ export default function Gallery() {
                                     fontSize: '0.9rem'
                                 }}
                             >
-                                {btn.label}
+                                {cat.label}
                             </button>
                         ))}
                     </div>
@@ -167,10 +200,7 @@ export default function Gallery() {
                                                     fontSize: '0.75rem',
                                                     fontWeight: 600
                                                 }}>
-                                                    {album.category === 'craft' ? '手作' :
-                                                        album.category === 'music' ? '音樂' :
-                                                            album.category === 'science' ? '科學' :
-                                                                album.category === 'outdoor' ? '戶外' : '特別活動'}
+                                                    {getCategoryLabel(album.category)}
                                                 </span>
                                             </div>
                                             <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', color: '#333' }}>{album.title}</h3>

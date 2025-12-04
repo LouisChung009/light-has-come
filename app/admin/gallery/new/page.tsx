@@ -1,9 +1,12 @@
 'use client'
 
 import { createAlbum } from '../actions'
+import { getCategories } from '../../categories/actions'
 import Link from 'next/link'
 
-export default function NewAlbum() {
+export default async function NewAlbum() {
+    const categories = await getCategories()
+
     return (
         <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
             <div style={{ marginBottom: '2rem' }}>
@@ -42,11 +45,11 @@ export default function NewAlbum() {
                             required
                             style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #ddd', background: 'white' }}
                         >
-                            <option value="craft">手作</option>
-                            <option value="music">音樂</option>
-                            <option value="science">科學</option>
-                            <option value="outdoor">戶外</option>
-                            <option value="special">特別活動</option>
+                            {categories.map(category => (
+                                <option key={category.id} value={category.value}>
+                                    {category.label}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>
