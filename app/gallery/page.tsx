@@ -27,11 +27,26 @@ export default function Gallery() {
     const [filter, setFilter] = useState('all');
     const [albums, setAlbums] = useState<Album[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [contactInfo, setContactInfo] = useState({ address: '', phone: '', time: '' });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchData() {
             const supabase = createClient();
+
+            // Fetch contact info
+            const { data: contactData } = await supabase
+                .from('site_content')
+                .select('*')
+                .eq('category', 'contact');
+
+            if (contactData) {
+                setContactInfo({
+                    address: contactData.find(item => item.id === 'contact_address')?.content || '',
+                    phone: contactData.find(item => item.id === 'contact_phone')?.content || '',
+                    time: contactData.find(item => item.id === 'contact_time')?.content || ''
+                });
+            }
 
             // Fetch categories
             const { data: categoriesData } = await supabase
@@ -247,9 +262,9 @@ export default function Gallery() {
                         <div>
                             <h4 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>聯絡資訊</h4>
                             <div style={{ color: 'rgba(255,255,255,0.8)', lineHeight: 2 }}>
-                                <p>📍 412台灣大里區東榮路312號</p>
-                                <p>📞 04 2482 3735</p>
-                                <p>⏰ 每週日 10:00-11:30</p>
+                                <p>📍 {contactInfo.address}</p>
+                                <p>📞 {contactInfo.phone}</p>
+                                <p>⏰ {contactInfo.time}</p>
                             </div>
                         </div>
                         <div>
