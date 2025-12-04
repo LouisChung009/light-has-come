@@ -2,20 +2,47 @@ import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { deleteAlbum } from './actions'
 import DeleteAlbumButton from './DeleteAlbumButton'
+import SortControl from './SortControl'
+import PinButton from './PinButton'
 
-export default async function AdminGallery() {
+export default async function AdminGallery({ searchParams }: { searchParams: Promise<{ sort?: string }> }) {
+    const { sort = 'date_desc' } = await searchParams
     const supabase = await createClient()
 
-    const { data: albums } = await supabase
+    let query = supabase
         .from('albums')
         .select('*')
-        .order('date', { ascending: false })
+
+    // Apply sorting
+    // Primary sort: is_pinned (descending) so true comes first
+    query = query.order('is_pinned', { ascending: false })
+
+    // Secondary sort based on user selection
+    switch (sort) {
+        case 'date_asc':
+            query = query.order('date', { ascending: true })
+            break
+        case 'title_asc':
+            query = query.order('title', { ascending: true })
+            break
+        case 'title_desc':
+            query = query.order('title', { ascending: false })
+            break
+        case 'date_desc':
+        default:
+            query = query.order('date', { ascending: false })
+            break
+    }
+
+    const { data: albums } = await query
 
     return (
         <div style={{ padding: '2rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1 style={{ fontSize: '1.75rem', color: '#333', margin: 0 }}>相簿管理</h1>
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                    <SortControl />
+                    <div style={{ width: '1px', height: '24px', background: '#e2e8f0', margin: '0 0.5rem' }}></div>
                     <Link href="/admin/gallery/bulk-import" style={{
                         background: '#1E293B',
                         color: 'white',
@@ -51,18 +78,38 @@ export default async function AdminGallery() {
                         background: 'white',
                         borderRadius: '0.75rem',
                         overflow: 'hidden',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                        border: '1px solid #eee'
+                        boxShadow: album.is_pinned ? '0 4px 12px rgba(255, 217, 61, 0.4)' : '0 2px 8px rgba(0,0,0,0.05)',
+                        border: album.is_pinned ? '2px solid #FFD93D' : '1px solid #eee',
+                        position: 'relative',
+                        transition: 'all 0.3s ease'
                     }}>
+                        <div style={{
+                            position: 'absolute',
+                            top: '0.75rem',
+                            right: '0.75rem',
+                            zIndex: 10
+                        }}>
+                            <PinButton id={album.id} isPinned={album.is_pinned || false} />
+                        </div>
+
                         <div style={{
                             height: '150px',
                             background: album.cover_color,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '3rem'
+                            fontSize: '3rem',
+                            position: 'relative'
                         }}>
-                            📷
+                            {album.cover_photo_url ? (
+                                <img
+                                    src={album.cover_photo_url}
+                                    alt={album.title}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                            ) : (
+                                <span>📷</span>
+                            )}
                         </div>
                         <div style={{ padding: '1.25rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
@@ -77,9 +124,12 @@ export default async function AdminGallery() {
                                     {album.category}
                                 </span>
                             </div>
-                            <h3 style={{ fontSize: '1.125rem', marginBottom: '0.5rem', color: '#333' }}>{album.title}</h3>
-                            <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1.5rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                {album.description}
+                            <h3 style={{ fontSize: '1.125rem', marginBottom: '0.5rem', color: '#333' }}>
+                                {album.is_pinned && <span style={{ marginRight: '0.5rem' }}>📌</span>}
+                                {album.title}
+                            </h3>
+                            <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1.5rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '2.6em' }}>
+                                {album.description || '沒有描述'}
                             </p>
 
                             <div style={{ display: 'flex', gap: '0.5rem' }}>

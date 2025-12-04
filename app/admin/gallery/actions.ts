@@ -104,6 +104,34 @@ export async function deleteAlbum(id: string): Promise<void> {
 
     revalidatePath('/admin/gallery')
     revalidatePath('/gallery')
+    revalidatePath('/gallery')
+}
+
+export async function updateAlbum(id: string, formData: FormData) {
+    const supabase = await createClient()
+
+    const title = formData.get('title') as string
+    const date = formData.get('date') as string
+    const category = formData.get('category') as string
+    const description = formData.get('description') as string
+
+    const { error } = await supabase
+        .from('albums')
+        .update({
+            title,
+            date,
+            category,
+            description
+        })
+        .eq('id', id)
+
+    if (error) {
+        throw new Error(error.message)
+    }
+
+    revalidatePath(`/admin/gallery/${id}`)
+    revalidatePath('/admin/gallery')
+    revalidatePath('/gallery')
 }
 
 export async function uploadPhoto(formData: FormData) {
