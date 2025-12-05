@@ -2,8 +2,16 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
-import { type AnnouncementConfig } from './actions'
 import PosterUploader from './PosterUploader'
+
+type AnnouncementConfig = {
+    enabled: boolean
+    imageUrl: string
+    ctaEnabled?: boolean
+    ctaLabel?: string
+    ctaHref?: string
+    storageKey?: string
+}
 
 export default function AnnouncementForm({ initialConfig }: { initialConfig: AnnouncementConfig }) {
     const [imageUrl, setImageUrl] = useState(initialConfig.imageUrl || '')
