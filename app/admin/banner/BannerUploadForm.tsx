@@ -10,19 +10,22 @@ export default function BannerUploadForm() {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        setIsUploading(true)
-
-        const formData = new FormData(e.currentTarget)
-        const result = await createBannerSlide(formData)
-
-        if (result?.error) {
-            alert('上傳失敗: ' + result.error)
-        } else {
-            e.currentTarget.reset()
-            router.refresh()
+        try {
+            setIsUploading(true)
+            const formData = new FormData(e.currentTarget)
+            const result = await createBannerSlide(formData)
+            if (result?.error) {
+                alert('上傳失敗: ' + result.error)
+            } else {
+                e.currentTarget.reset()
+                router.refresh()
+            }
+        } catch (err) {
+            console.error(err)
+            alert('上傳失敗，請稍後再試')
+        } finally {
+            setIsUploading(false)
         }
-
-        setIsUploading(false)
     }
 
     return (

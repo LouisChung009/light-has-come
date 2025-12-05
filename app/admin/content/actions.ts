@@ -39,13 +39,17 @@ export async function createBannerSlide(formData: FormData) {
     // Determine media type
     const mediaType = file.type.startsWith('video/') ? 'video' : 'image'
 
-    // Upload to storage
+    // Upload to storage (convert to buffer for Node env)
     const fileExt = file.name.split('.').pop()
     const fileName = `banners/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+    const buffer = Buffer.from(await file.arrayBuffer())
 
     const { error: uploadError } = await supabase.storage
         .from('gallery')
-        .upload(fileName, file)
+        .upload(fileName, buffer, {
+            contentType: file.type || undefined,
+            upsert: true,
+        })
 
     if (uploadError) {
         return { error: uploadError.message }

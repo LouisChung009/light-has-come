@@ -50,6 +50,10 @@ export async function saveAnnouncement(formData: FormData) {
         storageKey: (formData.get('storageKey') as string) || 'home-announcement',
     }
 
+    if (!payload.imageUrl) {
+        return { error: '請上傳海報圖片' }
+    }
+
     await supabase
         .from('site_content')
         .upsert({

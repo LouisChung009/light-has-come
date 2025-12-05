@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { saveAnnouncement, type AnnouncementConfig } from './actions'
 import PosterUploader from './PosterUploader'
@@ -12,9 +13,21 @@ export default function AnnouncementForm({ initialConfig }: { initialConfig: Ann
     const [ctaHref, setCtaHref] = useState(initialConfig.ctaHref || '/register')
     const [storageKey, setStorageKey] = useState(initialConfig.storageKey || 'home-announcement')
     const [isPending, startTransition] = useTransition()
+    const [errorMsg, setErrorMsg] = useState('')
+    const router = useRouter()
 
     return (
-        <form action={(formData) => startTransition(() => saveAnnouncement(formData))} style={{
+        <form action={(formData) => {
+            setErrorMsg('')
+            startTransition(async () => {
+                const res = await saveAnnouncement(formData)
+                if (res?.error) {
+                    setErrorMsg(res.error)
+                    return
+                }
+                router.refresh()
+            })
+        }} style={{
             background: 'white',
             padding: '1.5rem',
             borderRadius: '1rem',
@@ -36,6 +49,7 @@ export default function AnnouncementForm({ initialConfig }: { initialConfig: Ann
                 <p style={{ margin: '0.35rem 0 0', color: '#6b7280', fontSize: '0.9rem' }}>
                     可點擊或拖拉上傳；儲存在 Supabase Storage，前台彈窗將使用此圖片。
                 </p>
+                {!imageUrl && <p style={{ color: '#ef4444', fontWeight: 600, marginTop: '0.25rem' }}>請上傳海報圖片</p>}
             </div>
 
             <div style={{ padding: '1rem', borderRadius: '0.75rem', border: '1px solid #e5e7eb', background: '#f8fafc', display: 'grid', gap: '0.75rem' }}>
@@ -97,6 +111,7 @@ export default function AnnouncementForm({ initialConfig }: { initialConfig: Ann
             >
                 {isPending ? '儲存中...' : '儲存設定'}
             </button>
+            {errorMsg && <div style={{ color: '#ef4444', fontWeight: 700 }}>{errorMsg}</div>}
         </form>
     )
 }
