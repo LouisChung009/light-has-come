@@ -7,6 +7,7 @@ export type AnnouncementConfig = {
     enabled: boolean
     imageUrl: string
     ctaEnabled?: boolean
+    ctaLabel?: string
     ctaHref?: string
     storageKey?: string
 }
@@ -15,6 +16,7 @@ const DEFAULT_CONFIG: AnnouncementConfig = {
     enabled: false,
     imageUrl: '',
     ctaEnabled: true,
+    ctaLabel: '立即報名',
     ctaHref: '/register',
     storageKey: 'home-announcement-default',
 }
@@ -43,6 +45,7 @@ export async function saveAnnouncement(formData: FormData) {
         enabled: formData.get('enabled') === 'on',
         imageUrl: (formData.get('imageUrl') as string) || '',
         ctaEnabled: formData.get('ctaEnabled') === 'on',
+        ctaLabel: (formData.get('ctaLabel') as string) || '立即報名',
         ctaHref: (formData.get('ctaHref') as string) || '/register',
         storageKey: (formData.get('storageKey') as string) || 'home-announcement',
     }
