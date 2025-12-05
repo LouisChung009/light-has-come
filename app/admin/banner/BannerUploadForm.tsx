@@ -1,6 +1,5 @@
 'use client'
 
-import { createBannerSlide } from '../content/actions'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -10,19 +9,22 @@ export default function BannerUploadForm() {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        setIsUploading(true)
+        const formData = new FormData(e.currentTarget)
         try {
-            setIsUploading(true)
-            const formData = new FormData(e.currentTarget)
-            const result = await createBannerSlide(formData)
-            if (result?.error) {
-                alert('上傳失敗: ' + result.error)
-            } else {
-                e.currentTarget.reset()
-                router.refresh()
+            const res = await fetch('/api/banner', {
+                method: 'POST',
+                body: formData,
+            })
+            const data = await res.json()
+            if (!res.ok || data.error) {
+                throw new Error(data.error || '上傳失敗')
             }
+            e.currentTarget.reset()
+            router.refresh()
         } catch (err) {
             console.error(err)
-            alert('上傳失敗，請稍後再試')
+            alert(err instanceof Error ? err.message : '上傳失敗，請稍後再試')
         } finally {
             setIsUploading(false)
         }

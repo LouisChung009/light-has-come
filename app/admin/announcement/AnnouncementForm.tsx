@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
-import { saveAnnouncement, type AnnouncementConfig } from './actions'
+import { type AnnouncementConfig } from './actions'
 import PosterUploader from './PosterUploader'
 
 export default function AnnouncementForm({ initialConfig }: { initialConfig: AnnouncementConfig }) {
@@ -20,9 +20,13 @@ export default function AnnouncementForm({ initialConfig }: { initialConfig: Ann
         <form action={(formData) => {
             setErrorMsg('')
             startTransition(async () => {
-                const res = await saveAnnouncement(formData)
-                if (res?.error) {
-                    setErrorMsg(res.error)
+                const res = await fetch('/api/announcement', {
+                    method: 'POST',
+                    body: formData
+                })
+                const data = await res.json()
+                if (!res.ok || data.error) {
+                    setErrorMsg(data.error || '儲存失敗')
                     return
                 }
                 router.refresh()
