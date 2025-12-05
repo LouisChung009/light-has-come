@@ -2,6 +2,7 @@ import Link from 'next/link'
 import HeroBanner from './components/HeroBanner'
 import Footer from './components/Footer'
 import { createClient } from '@/utils/supabase/server'
+import HomeAnnouncementModal from './components/HomeAnnouncementModal'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -19,6 +20,15 @@ export default async function Home() {
 
   return (
     <div style={{ minHeight: '100vh' }}>
+      <HomeAnnouncementModal
+        title="陪孩子長大，家長不孤單"
+        subtitle="最新消息 / 公益親子活動巡迴"
+        content="2025/11/22 愛心育幼院、12/13 埔里｜2026/01/17 高雄、03/07 開山、03/28 花蓮、04/18 萬里"
+        ctaEnabled={true}
+        ctaLabel="立即報名"
+        ctaHref="/register"
+        storageKey="home-announcement-2025-12-05"
+      />
       {/* Hero Banner with Carousel */}
       <HeroBanner />
 
