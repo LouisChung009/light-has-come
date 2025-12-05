@@ -1,4 +1,5 @@
-import { getAnnouncement, saveAnnouncement } from './actions'
+import { getAnnouncement } from './actions'
+import AnnouncementForm from './AnnouncementForm'
 
 export default async function AnnouncementAdmin() {
     const config = await getAnnouncement()
@@ -10,86 +11,7 @@ export default async function AnnouncementAdmin() {
                 可在此控制首頁進站公告的顯示/隱藏、文字內容，以及是否顯示「立即報名」按鈕。
             </p>
 
-            <form action={saveAnnouncement} style={{
-                background: 'white',
-                padding: '1.5rem',
-                borderRadius: '1rem',
-                border: '1px solid #e5e7eb',
-                boxShadow: '0 4px 10px rgba(0,0,0,0.04)',
-                display: 'grid',
-                gap: '1rem'
-            }}>
-                <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontWeight: 600, color: '#111' }}>
-                    <input type="checkbox" name="enabled" defaultChecked={config.enabled} />
-                    啟用彈出視窗
-                </label>
-
-                <div>
-                    <label style={{ display: 'block', fontWeight: 600, color: '#111', marginBottom: '0.35rem' }}>海報圖片連結</label>
-                    <input
-                        name="imageUrl"
-                        defaultValue={config.imageUrl}
-                        required
-                        placeholder="請輸入公告圖片網址 (可放 Supabase 公開連結)"
-                        style={{ width: '100%', padding: '0.75rem', borderRadius: '0.6rem', border: '1px solid #e5e7eb' }}
-                    />
-                </div>
-
-                <div style={{ padding: '1rem', borderRadius: '0.75rem', border: '1px solid #e5e7eb', background: '#f8fafc', display: 'grid', gap: '0.75rem' }}>
-                    <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontWeight: 600, color: '#111' }}>
-                        <input type="checkbox" name="ctaEnabled" defaultChecked={config.ctaEnabled} />
-                        顯示「立即報名」按鈕
-                    </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                        <div>
-                            <label style={{ display: 'block', fontWeight: 600, color: '#111', marginBottom: '0.35rem' }}>按鈕文字</label>
-                            <input
-                                name="ctaLabel"
-                                defaultValue={config.ctaLabel || '立即報名'}
-                                style={{ width: '100%', padding: '0.7rem', borderRadius: '0.6rem', border: '1px solid #e5e7eb' }}
-                            />
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', fontWeight: 600, color: '#111', marginBottom: '0.35rem' }}>按鈕連結</label>
-                            <input
-                                name="ctaHref"
-                                defaultValue={config.ctaHref}
-                                placeholder="/register"
-                                style={{ width: '100%', padding: '0.7rem', borderRadius: '0.6rem', border: '1px solid #e5e7eb' }}
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <label style={{ display: 'block', fontWeight: 600, color: '#111', marginBottom: '0.35rem' }}>Storage Key (控制每次進站是否再顯示)</label>
-                    <input
-                        name="storageKey"
-                        defaultValue={config.storageKey}
-                        style={{ width: '100%', padding: '0.7rem', borderRadius: '0.6rem', border: '1px solid #e5e7eb' }}
-                    />
-                    <p style={{ margin: '0.35rem 0 0', color: '#6b7280', fontSize: '0.9rem' }}>
-                        更換此值可讓使用者重新看到公告（儲存於 sessionStorage）。
-                    </p>
-                </div>
-
-                <button
-                    type="submit"
-                    style={{
-                        background: '#4A90C8',
-                        color: 'white',
-                        padding: '0.85rem 1.4rem',
-                        borderRadius: '0.75rem',
-                        border: 'none',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        boxShadow: '0 12px 20px rgba(74,144,200,0.25)',
-                        width: 'fit-content'
-                    }}
-                >
-                    儲存設定
-                </button>
-            </form>
+            <AnnouncementForm initialConfig={config} />
         </div>
     )
 }

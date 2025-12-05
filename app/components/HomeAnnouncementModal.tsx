@@ -137,7 +137,7 @@ export default function HomeAnnouncementModal({
                                     }}
                                     onClick={handleClose}
                                 >
-                                    {ctaLabel}
+                                    {ctaLabel || '立即報名'}
                                     <span style={{ fontSize: '1.1rem' }}>→</span>
                                 </Link>
                             )}
