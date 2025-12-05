@@ -46,8 +46,6 @@ export default function UploadPhotoForm({ albumId }: { albumId: string }) {
         setIsUploading(true)
         setProgress({ current: 0, total: files.length })
 
-        let successCount = 0
-
         for (let i = 0; i < files.length; i++) {
             const formData = new FormData()
             formData.append('albumId', albumId)
@@ -55,7 +53,6 @@ export default function UploadPhotoForm({ albumId }: { albumId: string }) {
 
             try {
                 await uploadPhoto(formData)
-                successCount++
             } catch (error) {
                 console.error('Upload failed for file:', files[i].name, error)
             }

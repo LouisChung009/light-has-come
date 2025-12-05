@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createCategory, updateCategory, deleteCategory, type Category } from './actions'
 
 export default function CategoryManager({ initialCategories }: { initialCategories: Category[] }) {
-    const [categories, setCategories] = useState(initialCategories)
+    const categories = initialCategories
     const [isCreating, setIsCreating] = useState(false)
 
     // Optimistic UI updates could be added here, but for now we rely on revalidation

@@ -1,6 +1,9 @@
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function Footer() {
   const supabase = await createClient()
 
@@ -28,7 +31,7 @@ export default async function Footer() {
             <h3 style={{ fontSize: '1.5rem', color: '#FFD93D', marginBottom: '1rem' }}>光·來了</h3>
             <p style={{ color: 'rgba(255,255,255,0.8)', lineHeight: 1.7 }}>
               大里思恩堂兒童主日學<br />
-              "我就是來到世上的光,使凡信我的不住在黑暗裡。"
+              耶穌說：我就是來到世上的光，使凡信我的不住在黑暗裡。
             </p>
           </div>
           <div>

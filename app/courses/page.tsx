@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import Footer from '../components/Footer'
 
+export const dynamic = 'force-dynamic'
+
 export default async function Courses() {
     const supabase = await createClient()
 

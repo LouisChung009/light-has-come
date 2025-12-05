@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-head-element, @next/next/no-page-custom-font */
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -33,3 +34,4 @@ export default function RootLayout({
         </html>
     );
 }
+/* eslint-disable @next/next/no-head-element, @next/next/no-page-custom-font */

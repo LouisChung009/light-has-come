@@ -104,7 +104,7 @@ export async function deleteAlbum(id: string): Promise<void> {
 
     revalidatePath('/admin/gallery')
     revalidatePath('/gallery')
-    revalidatePath('/gallery')
+    revalidatePath(`/gallery/${id}`)
 }
 
 export async function updateAlbum(id: string, formData: FormData) {
@@ -132,6 +132,23 @@ export async function updateAlbum(id: string, formData: FormData) {
     revalidatePath(`/admin/gallery/${id}`)
     revalidatePath('/admin/gallery')
     revalidatePath('/gallery')
+}
+
+export async function togglePin(id: string, isPinned: boolean) {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('albums')
+        .update({ is_pinned: !isPinned })
+        .eq('id', id)
+
+    if (error) {
+        throw new Error(error.message)
+    }
+
+    revalidatePath('/admin/gallery')
+    revalidatePath('/gallery')
+    revalidatePath(`/gallery/${id}`)
 }
 
 export async function uploadPhoto(formData: FormData) {
@@ -472,7 +489,7 @@ function normalizeDate(dateStr?: string) {
     const match = cleaned.match(/(\d{4})-?(\d{1,2})-?(\d{1,2})/)
     if (!match) return new Date().toISOString().slice(0, 10)
 
-    const [_, y, m, d] = match
+    const [, y, m, d] = match
     const month = m.padStart(2, '0')
     const day = d.padStart(2, '0')
     return `${y}-${month}-${day}`

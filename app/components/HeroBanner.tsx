@@ -98,8 +98,6 @@ export default function HeroBanner() {
         )
     }
 
-    const currentBanner = banners[currentIndex]
-
     return (
         <section style={{
             position: 'relative',

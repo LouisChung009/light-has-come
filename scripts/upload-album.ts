@@ -53,7 +53,7 @@ async function uploadAlbum(folderPath: string, albumName: string, date: string) 
     let successCount = 0
     let failCount = 0
 
-    for (const [index, file] of files.entries()) {
+    for (const [, file] of files.entries()) {
         const filePath = path.join(folderPath, file)
         const fileBuffer = fs.readFileSync(filePath)
         const fileName = `${Date.now()}-${file}`

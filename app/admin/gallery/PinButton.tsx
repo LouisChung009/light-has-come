@@ -1,16 +1,19 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { togglePin } from './actions'
 
 export default function PinButton({ id, isPinned }: { id: string, isPinned: boolean }) {
     const [isLoading, setIsLoading] = useState(false)
+    const router = useRouter()
 
     async function handleClick(e: React.MouseEvent) {
         e.preventDefault() // Prevent link navigation
         setIsLoading(true)
         try {
             await togglePin(id, isPinned)
+            router.refresh()
         } catch (error) {
             console.error('Failed to toggle pin:', error)
             alert('操作失敗')

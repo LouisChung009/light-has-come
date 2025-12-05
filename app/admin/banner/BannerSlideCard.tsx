@@ -51,6 +51,7 @@ export default function BannerSlideCard({ banner }: { banner: Banner }) {
                         autoPlay
                     />
                 ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                         src={banner.media_url}
                         alt={banner.title || 'Banner'}

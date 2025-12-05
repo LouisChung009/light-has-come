@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import HeroBanner from './components/HeroBanner'
 import Footer from './components/Footer'
 import { createClient } from '@/utils/supabase/server'

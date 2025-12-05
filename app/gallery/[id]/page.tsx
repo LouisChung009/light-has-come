@@ -1,76 +1,49 @@
-'use client';
+import { createClient } from '@/utils/supabase/server'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import Footer from '../../components/Footer'
 
-import { createClient } from '@/utils/supabase/client';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { useEffect, useState, use } from 'react';
-
-interface Photo {
-    id: string;
-    src: string;
-    alt: string;
-    width: number;
-    height: number;
+type Photo = {
+    id: string
+    src: string
+    alt: string
+    width: number
+    height: number
 }
 
-interface Album {
-    id: string;
-    title: string;
-    date: string;
-    description: string;
-    cover_color: string;
+type Album = {
+    id: string
+    title: string
+    date: string
+    description: string
+    cover_color: string
 }
 
-export default function AlbumDetail({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = use(params);
-    const [album, setAlbum] = useState<Album | null>(null);
-    const [photos, setPhotos] = useState<Photo[]>([]);
-    const [loading, setLoading] = useState(true);
+export const dynamic = 'force-dynamic'
 
-    useEffect(() => {
-        async function fetchData() {
-            const supabase = createClient();
+export default async function AlbumDetail({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+    const supabase = await createClient()
 
-            // Fetch album details
-            const { data: albumData, error: albumError } = await supabase
-                .from('albums')
-                .select('*')
-                .eq('id', id)
-                .single();
+    const { data: albumData } = await supabase
+        .from('albums')
+        .select('id, title, date, description, cover_color')
+        .eq('id', id)
+        .single()
 
-            if (albumError || !albumData) {
-                console.error('Error fetching album:', albumError);
-                setLoading(false);
-                return;
-            }
-
-            setAlbum(albumData);
-
-            // Fetch photos
-            const { data: photosData, error: photosError } = await supabase
-                .from('photos')
-                .select('*')
-                .eq('album_id', id)
-                .order('created_at', { ascending: false });
-
-            if (photosError) {
-                console.error('Error fetching photos:', photosError);
-            } else {
-                setPhotos(photosData || []);
-            }
-            setLoading(false);
-        }
-
-        fetchData();
-    }, [id]);
-
-    if (loading) {
-        return <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>載入中...</div>;
-    }
+    const album = albumData as Album | null
 
     if (!album) {
-        notFound();
+        notFound()
     }
+
+    const { data: photosData } = await supabase
+        .from('photos')
+        .select('*')
+        .eq('album_id', id)
+        .order('created_at', { ascending: false })
+
+    const photos = (photosData || []) as Photo[]
 
     return (
         <div style={{ minHeight: '100vh', background: '#F5F5F5' }}>
@@ -112,7 +85,7 @@ export default function AlbumDetail({ params }: { params: Promise<{ id: string }
                     </span>
                     <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', marginBottom: '1rem' }}>{album.title}</h1>
                     <p style={{ fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', opacity: 0.9, maxWidth: '800px', margin: '0 auto' }}>
-                        {album.description}
+                        {album.description || '這個相簿尚無描述'}
                     </p>
                 </div>
             </section>
@@ -126,9 +99,8 @@ export default function AlbumDetail({ params }: { params: Promise<{ id: string }
                         <div style={{
                             columnCount: 3,
                             columnGap: '1.5rem',
-                            // Responsive columns handled by media queries in style tag below
                         }} className="masonry-grid">
-                            {photos.map((photo) => (
+                            {photos.map((photo: Photo) => (
                                 <div key={photo.id} style={{
                                     breakInside: 'avoid',
                                     marginBottom: '1.5rem',
@@ -138,6 +110,7 @@ export default function AlbumDetail({ params }: { params: Promise<{ id: string }
                                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                                     transition: 'transform 0.3s',
                                 }} className="hover:scale-[1.02]">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={photo.src}
                                         alt={photo.alt || 'photo'}
@@ -154,58 +127,20 @@ export default function AlbumDetail({ params }: { params: Promise<{ id: string }
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer style={{ background: '#333', color: 'white', padding: '3rem 1.5rem' }}>
-                <div className="container">
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                        gap: '2rem',
-                        marginBottom: '2rem',
-                    }}>
-                        <div>
-                            <h3 style={{ fontSize: '1.5rem', color: '#FFD93D', marginBottom: '1rem' }}>光·來了</h3>
-                            <p style={{ color: 'rgba(255,255,255,0.8)', lineHeight: 1.7 }}>
-                                大里思恩堂兒童主日學<br />
-                                "我就是來到世上的光,使凡信我的不住在黑暗裡。"
-                            </p>
-                        </div>
-                        <div>
-                            <h4 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>聯絡資訊</h4>
-                            <div style={{ color: 'rgba(255,255,255,0.8)', lineHeight: 2 }}>
-                                <p>📍 412台灣大里區東榮路312號</p>
-                                <p>📞 04 2482 3735</p>
-                                <p>⏰ 每週日 10:00-11:30</p>
-                            </div>
-                        </div>
-                        <div>
-                            <h4 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>快速連結</h4>
-                            <div style={{ lineHeight: 2 }}>
-                                <p><Link href="/courses" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>課程介紹</Link></p>
-                                <p><Link href="/gallery" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>活動花絮</Link></p>
-                                <p><Link href="/about" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>關於我們</Link></p>
-                                <p><Link href="/register" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>預約體驗</Link></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.6)', fontSize: '0.875rem' }}>
-                        <p>© 2025 光·來了 - 大里思恩堂兒童主日學. All rights reserved.</p>
-                    </div>
-                </div>
-            </footer>
+            <Footer />
 
-            <style jsx global>{`
-        @media (max-width: 1024px) {
-          .masonry-grid {
-            column-count: 2 !important;
-          }
-        }
-        @media (max-width: 640px) {
-          .masonry-grid {
-            column-count: 1 !important;
-          }
-        }
-      `}</style>
+            <style>{`
+                @media (max-width: 1024px) {
+                    .masonry-grid {
+                        column-count: 2 !important;
+                    }
+                }
+                @media (max-width: 640px) {
+                    .masonry-grid {
+                        column-count: 1 !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

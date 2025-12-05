@@ -60,6 +60,7 @@ export default async function AlbumDetail({ params }: { params: Promise<{ id: st
                     }}
                         className="group"
                     >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={photo.src}
                             alt={photo.alt}

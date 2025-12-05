@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
-import { deleteAlbum } from './actions'
 import DeleteAlbumButton from './DeleteAlbumButton'
 import SortControl from './SortControl'
 import PinButton from './PinButton'
@@ -95,19 +94,20 @@ export default async function AdminGallery({ searchParams }: { searchParams: Pro
                         <div style={{
                             height: '150px',
                             background: album.cover_color,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '3rem',
-                            position: 'relative'
-                        }}>
-                            {album.cover_photo_url ? (
-                                <img
-                                    src={album.cover_photo_url}
-                                    alt={album.title}
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                />
-                            ) : (
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '3rem',
+                        position: 'relative'
+                    }}>
+                        {album.cover_photo_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                                src={album.cover_photo_url}
+                                alt={album.title}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                        ) : (
                                 <span>📷</span>
                             )}
                         </div>

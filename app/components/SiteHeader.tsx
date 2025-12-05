@@ -18,6 +18,8 @@ export default function SiteHeader() {
 
   // Close menu when route changes
   useEffect(() => {
+    // Safe: only runs on navigation to collapse mobile menu
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMenuOpen(false)
   }, [pathname])
 
@@ -354,4 +356,3 @@ export default function SiteHeader() {
     </>
   )
 }
-

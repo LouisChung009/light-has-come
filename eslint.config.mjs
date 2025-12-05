@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local ignores
+    "**/._*",
+    ".vercel/**",
+    "node_modules/**",
+    "**/.DS_Store",
+    "layout-option-*.tsx",
   ]),
 ]);
 

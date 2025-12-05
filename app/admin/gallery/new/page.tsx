@@ -1,5 +1,3 @@
-'use client'
-
 import { createAlbum } from '../actions'
 import { getCategories } from '../../categories/actions'
 import Link from 'next/link'

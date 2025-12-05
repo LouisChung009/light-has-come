@@ -32,8 +32,6 @@ if (!supabaseServiceKey) {
 const SOURCE_DIR = 'line_albums'
 const COMPLETED_DIR = 'line_albums/_completed'
 
-// AI Filtering Configuration
-const SIMILARITY_THRESHOLD = 5 // Lower = stricter (0 is exact match), 5-10 is good for burst shots
 const HASH_SIZE = 16
 
 async function processAllAlbums() {
