@@ -28,6 +28,7 @@ export async function POST(request: Request) {
             .upsert({
                 id: 'home_announcement',
                 category: 'announcement',
+                label: '首頁彈窗',
                 content: JSON.stringify(payload),
             })
 

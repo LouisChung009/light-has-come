@@ -1,16 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function BannerUploadForm() {
     const [isUploading, setIsUploading] = useState(false)
     const router = useRouter()
+    const formRef = useRef<HTMLFormElement>(null)
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        const formEl = formRef.current
+        if (!formEl) return
         setIsUploading(true)
-        const formData = new FormData(e.currentTarget)
+        const formData = new FormData(formEl)
         try {
             const res = await fetch('/api/banner', {
                 method: 'POST',
@@ -20,7 +23,7 @@ export default function BannerUploadForm() {
             if (!res.ok || data.error) {
                 throw new Error(data.error || '上傳失敗')
             }
-            e.currentTarget.reset()
+            formEl.reset()
             router.refresh()
         } catch (err) {
             console.error(err)
@@ -31,7 +34,7 @@ export default function BannerUploadForm() {
     }
 
     return (
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <form ref={formRef} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#333' }}>
                     照片或影片 <span style={{ color: '#ef4444' }}>*</span>
