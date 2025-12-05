@@ -55,9 +55,7 @@ export default async function Home() {
         <div style={{ minHeight: '100vh' }}>
             <HomeAnnouncementModal
                 enabled={announcement.enabled}
-                title={announcement.title}
-                subtitle={announcement.subtitle}
-                content={announcement.content}
+                imageUrl={announcement.imageUrl}
                 ctaEnabled={announcement.ctaEnabled}
                 ctaLabel={announcement.ctaLabel}
                 ctaHref={announcement.ctaHref}
