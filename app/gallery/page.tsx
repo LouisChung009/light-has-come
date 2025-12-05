@@ -89,7 +89,7 @@ export default async function Gallery({ searchParams }: { searchParams: Promise<
                         <Link href="/gallery" style={filterLinkStyle(filter === 'all')}>
                             全部活動
                         </Link>
-                        {categories.map(cat => (
+                        {safeCategories.map(cat => (
                             <Link
                                 key={cat.id}
                                 href={`?filter=${cat.value}`}
