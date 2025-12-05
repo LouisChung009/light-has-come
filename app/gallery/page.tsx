@@ -29,7 +29,7 @@ export default async function Gallery({ searchParams }: { searchParams: Promise<
 
     const supabase = await createClient()
 
-    const [{ data: categories = [] as Category[] }, { data: albums = [] as Album[] }] = await Promise.all([
+    const [{ data: categories }, { data: albums }] = await Promise.all([
         supabase
             .from('album_categories')
             .select('*')
@@ -41,12 +41,15 @@ export default async function Gallery({ searchParams }: { searchParams: Promise<
             .order('date', { ascending: false }),
     ])
 
+    const safeCategories = (categories || []) as Category[]
+    const safeAlbums = (albums || []) as Album[]
+
     const filteredAlbums = filter === 'all'
-        ? albums
-        : albums.filter(album => album.category === filter)
+        ? safeAlbums
+        : safeAlbums.filter(album => album.category === filter)
 
     const getCategoryLabel = (value: string) => {
-        const cat = categories.find(c => c.value === value)
+        const cat = safeCategories.find(c => c.value === value)
         return cat ? cat.label : value
     }
 
