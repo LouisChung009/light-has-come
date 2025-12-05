@@ -5,22 +5,16 @@ import { revalidatePath } from 'next/cache'
 
 export type AnnouncementConfig = {
     enabled: boolean
-    title: string
-    subtitle?: string
-    content?: string
+    imageUrl: string
     ctaEnabled?: boolean
-    ctaLabel?: string
     ctaHref?: string
     storageKey?: string
 }
 
 const DEFAULT_CONFIG: AnnouncementConfig = {
     enabled: false,
-    title: '',
-    subtitle: '',
-    content: '',
+    imageUrl: '',
     ctaEnabled: true,
-    ctaLabel: '立即報名',
     ctaHref: '/register',
     storageKey: 'home-announcement-default',
 }
@@ -47,11 +41,8 @@ export async function saveAnnouncement(formData: FormData) {
 
     const payload: AnnouncementConfig = {
         enabled: formData.get('enabled') === 'on',
-        title: (formData.get('title') as string) || '',
-        subtitle: (formData.get('subtitle') as string) || '',
-        content: (formData.get('content') as string) || '',
+        imageUrl: (formData.get('imageUrl') as string) || '',
         ctaEnabled: formData.get('ctaEnabled') === 'on',
-        ctaLabel: (formData.get('ctaLabel') as string) || '立即報名',
         ctaHref: (formData.get('ctaHref') as string) || '/register',
         storageKey: (formData.get('storageKey') as string) || 'home-announcement',
     }

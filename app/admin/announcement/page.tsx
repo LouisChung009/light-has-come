@@ -25,33 +25,12 @@ export default async function AnnouncementAdmin() {
                 </label>
 
                 <div>
-                    <label style={{ display: 'block', fontWeight: 600, color: '#111', marginBottom: '0.35rem' }}>標題</label>
+                    <label style={{ display: 'block', fontWeight: 600, color: '#111', marginBottom: '0.35rem' }}>海報圖片連結</label>
                     <input
-                        name="title"
-                        defaultValue={config.title}
+                        name="imageUrl"
+                        defaultValue={config.imageUrl}
                         required
-                        placeholder="例如：最新活動訊息"
-                        style={{ width: '100%', padding: '0.75rem', borderRadius: '0.6rem', border: '1px solid #e5e7eb' }}
-                    />
-                </div>
-
-                <div>
-                    <label style={{ display: 'block', fontWeight: 600, color: '#111', marginBottom: '0.35rem' }}>副標題 (選填)</label>
-                    <input
-                        name="subtitle"
-                        defaultValue={config.subtitle}
-                        placeholder="例如：公益親子活動巡迴"
-                        style={{ width: '100%', padding: '0.75rem', borderRadius: '0.6rem', border: '1px solid #e5e7eb' }}
-                    />
-                </div>
-
-                <div>
-                    <label style={{ display: 'block', fontWeight: 600, color: '#111', marginBottom: '0.35rem' }}>內容 (選填)</label>
-                    <textarea
-                        name="content"
-                        rows={4}
-                        defaultValue={config.content}
-                        placeholder="可填日期、地點、其他說明"
+                        placeholder="請輸入公告圖片網址 (可放 Supabase 公開連結)"
                         style={{ width: '100%', padding: '0.75rem', borderRadius: '0.6rem', border: '1px solid #e5e7eb' }}
                     />
                 </div>
@@ -66,7 +45,7 @@ export default async function AnnouncementAdmin() {
                             <label style={{ display: 'block', fontWeight: 600, color: '#111', marginBottom: '0.35rem' }}>按鈕文字</label>
                             <input
                                 name="ctaLabel"
-                                defaultValue={config.ctaLabel}
+                                defaultValue={config.ctaLabel || '立即報名'}
                                 style={{ width: '100%', padding: '0.7rem', borderRadius: '0.6rem', border: '1px solid #e5e7eb' }}
                             />
                         </div>

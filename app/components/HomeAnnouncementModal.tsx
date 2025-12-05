@@ -5,9 +5,7 @@ import Link from 'next/link'
 
 type AnnouncementProps = {
     enabled?: boolean
-    title?: string
-    subtitle?: string
-    content?: string
+    imageUrl?: string
     ctaEnabled?: boolean
     ctaLabel?: string
     ctaHref?: string
@@ -16,9 +14,7 @@ type AnnouncementProps = {
 
 export default function HomeAnnouncementModal({
     enabled = true,
-    title,
-    subtitle,
-    content,
+    imageUrl,
     ctaEnabled = true,
     ctaLabel = '立即報名',
     ctaHref = '/register',
@@ -39,7 +35,7 @@ export default function HomeAnnouncementModal({
         sessionStorage.setItem(storageKey, '1')
     }
 
-    if (!enabled || !title) return null
+    if (!enabled || !imageUrl) return null
     if (!open) return null
 
     return (
@@ -55,8 +51,8 @@ export default function HomeAnnouncementModal({
         }}>
             <div style={{
                 position: 'relative',
-                width: 'min(720px, 100%)',
-                background: 'linear-gradient(135deg, #fffdf5, #fff6e5)',
+                width: 'min(760px, 100%)',
+                background: '#111',
                 borderRadius: '1.25rem',
                 boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
                 overflow: 'hidden',
@@ -86,38 +82,21 @@ export default function HomeAnnouncementModal({
                     ×
                 </button>
 
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr',
-                    gap: '1.25rem',
-                    padding: '2rem',
-                }}>
-                    <div>
-                        <p style={{
-                            margin: 0,
-                            color: '#ef4444',
-                            fontWeight: 700,
-                            letterSpacing: '0.05em',
-                            fontSize: '0.95rem'
-                        }}>
-                            最新公告
-                        </p>
-                        <h2 style={{ margin: '0.25rem 0', fontSize: '2rem', color: '#1f2937', lineHeight: 1.2 }}>
-                            {title}
-                        </h2>
-                        {subtitle && (
-                            <p style={{ margin: '0.25rem 0', fontSize: '1.1rem', color: '#374151', fontWeight: 600 }}>
-                                {subtitle}
-                            </p>
-                        )}
-                        {content && (
-                            <p style={{ marginTop: '0.75rem', color: '#4b5563', lineHeight: 1.6 }}>
-                                {content}
-                            </p>
-                        )}
-                    </div>
+                <div style={{ position: 'relative', background: '#fefefe' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src={imageUrl}
+                        alt="最新公告"
+                        style={{ display: 'block', width: '100%', height: 'auto' }}
+                    />
 
-                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div style={{
+                        position: 'absolute',
+                        bottom: '16px',
+                        right: '16px',
+                        display: 'flex',
+                        gap: '0.5rem',
+                    }}>
                         {ctaEnabled && (
                             <Link
                                 href={ctaHref}
@@ -125,14 +104,15 @@ export default function HomeAnnouncementModal({
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    gap: '0.4rem',
+                                    gap: '0.35rem',
                                     background: 'linear-gradient(135deg, #f97316, #ef4444)',
                                     color: 'white',
-                                    padding: '0.85rem 1.4rem',
-                                    borderRadius: '0.75rem',
+                                    padding: '0.75rem 1.35rem',
+                                    borderRadius: '9999px',
                                     textDecoration: 'none',
-                                    fontWeight: 700,
-                                    boxShadow: '0 12px 25px rgba(239,68,68,0.35)',
+                                    fontWeight: 800,
+                                    letterSpacing: '0.02em',
+                                    boxShadow: '0 10px 18px rgba(239,68,68,0.35)',
                                 }}
                                 onClick={handleClose}
                             >
@@ -143,14 +123,14 @@ export default function HomeAnnouncementModal({
                         <button
                             onClick={handleClose}
                             style={{
-                                background: 'white',
-                                border: '1px solid #e5e7eb',
-                                color: '#374151',
-                                padding: '0.85rem 1.2rem',
-                                borderRadius: '0.75rem',
+                                background: 'rgba(0,0,0,0.65)',
+                                color: 'white',
+                                padding: '0.75rem 1.1rem',
+                                borderRadius: '9999px',
+                                border: 'none',
                                 cursor: 'pointer',
-                                fontWeight: 600,
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                                fontWeight: 700,
+                                boxShadow: '0 6px 12px rgba(0,0,0,0.25)',
                             }}
                         >
                             關閉

@@ -6,9 +6,7 @@ import { createClient } from '@/utils/supabase/server'
 
 type AnnouncementConfig = {
     enabled: boolean
-    title: string
-    subtitle?: string
-    content?: string
+    imageUrl: string
     ctaEnabled?: boolean
     ctaLabel?: string
     ctaHref?: string
@@ -33,9 +31,7 @@ export default async function Home() {
 
     const defaultAnnouncement: AnnouncementConfig = {
         enabled: false,
-        title: '',
-        subtitle: '',
-        content: '',
+        imageUrl: '',
         ctaEnabled: true,
         ctaLabel: '立即報名',
         ctaHref: '/register',
