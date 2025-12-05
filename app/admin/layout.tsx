@@ -1,6 +1,6 @@
-import { createClient } from '@/utils/supabase/server'
-import Link from 'next/link'
-import { logout } from './actions'
+import { createClient } from "@/utils/supabase/server"
+import Link from "next/link"
+import { logout } from "./actions"
 
 export default async function AdminLayout({
     children,
@@ -9,12 +9,6 @@ export default async function AdminLayout({
 }) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-
-    // 如果是登入頁面，不需要顯示側邊欄
-    // 但這裡是 Layout，會包住所有 admin 頁面
-    // 我們可以透過檢查 user 是否存在來決定是否顯示後台介面
-    // 如果沒有 user，且不是在登入頁 (page.tsx)，Middleware 會導向登入頁
-    // 但 Layout 會在 page.tsx 之前渲染
 
     if (!user) {
         return <>{children}</>
@@ -44,16 +38,15 @@ export default async function AdminLayout({
                         borderRadius: '0.5rem',
                         background: 'rgba(255,255,255,0.1)'
                     }}>
-                        📊 報名資料
+                        📋 報名資料
                     </Link>
                     <Link href="/admin/gallery" style={{
                         padding: '0.75rem 1rem',
                         color: 'rgba(255,255,255,0.8)',
                         textDecoration: 'none',
                         borderRadius: '0.5rem',
-                        // background: 'rgba(255,255,255,0.1)'
                     }}>
-                        📷 相簿管理
+                        🖼 相簿管理
                     </Link>
                     <Link href="/admin/content" style={{
                         padding: '0.75rem 1rem',
@@ -61,7 +54,15 @@ export default async function AdminLayout({
                         textDecoration: 'none',
                         borderRadius: '0.5rem',
                     }}>
-                        📝 文案管理
+                        ✏️ 文案管理
+                    </Link>
+                    <Link href="/admin/announcement" style={{
+                        padding: '0.75rem 1rem',
+                        color: 'rgba(255,255,255,0.8)',
+                        textDecoration: 'none',
+                        borderRadius: '0.5rem',
+                    }}>
+                        📢 彈窗設定
                     </Link>
                     <Link href="/admin/categories" style={{
                         padding: '0.75rem 1rem',
@@ -69,7 +70,7 @@ export default async function AdminLayout({
                         textDecoration: 'none',
                         borderRadius: '0.5rem',
                     }}>
-                        🏷️ 分類管理
+                        🗂 分類管理
                     </Link>
                     <Link href="/" target="_blank" style={{
                         padding: '0.75rem 1rem',
@@ -78,7 +79,7 @@ export default async function AdminLayout({
                         borderRadius: '0.5rem',
                         marginTop: 'auto'
                     }}>
-                        🔗 前往前台
+                        🏠 前往前台
                     </Link>
                 </nav>
 

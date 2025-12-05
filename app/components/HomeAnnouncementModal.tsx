@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 type AnnouncementProps = {
-    title: string
+    enabled?: boolean
+    title?: string
     subtitle?: string
     content?: string
     ctaEnabled?: boolean
@@ -14,6 +15,7 @@ type AnnouncementProps = {
 }
 
 export default function HomeAnnouncementModal({
+    enabled = true,
     title,
     subtitle,
     content,
@@ -37,6 +39,7 @@ export default function HomeAnnouncementModal({
         sessionStorage.setItem(storageKey, '1')
     }
 
+    if (!enabled || !title) return null
     if (!open) return null
 
     return (
