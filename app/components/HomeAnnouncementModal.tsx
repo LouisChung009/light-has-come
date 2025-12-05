@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -21,18 +22,33 @@ export default function HomeAnnouncementModal({
     storageKey = 'home-announcement-dismissed',
 }: AnnouncementProps) {
     const [open, setOpen] = useState(false)
+    const [dontShowToday, setDontShowToday] = useState(false)
+
+    const todayKey = typeof window !== 'undefined' ? new Date().toISOString().slice(0, 10) : ''
 
     useEffect(() => {
-        const dismissed = typeof window !== 'undefined' ? sessionStorage.getItem(storageKey) : null
-        if (!dismissed) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setOpen(true)
+        if (typeof window === 'undefined') return
+        const suppressed = localStorage.getItem(storageKey)
+        if (suppressed === todayKey) {
+            setOpen(false)
+            return
         }
-    }, [storageKey])
+        if (!suppressed) {
+            setOpen(true)
+            return
+        }
+        setOpen(true)
+    }, [storageKey, todayKey])
 
     const handleClose = () => {
+        if (typeof window !== 'undefined') {
+            if (dontShowToday) {
+                localStorage.setItem(storageKey, todayKey)
+            } else {
+                localStorage.removeItem(storageKey)
+            }
+        }
         setOpen(false)
-        sessionStorage.setItem(storageKey, '1')
     }
 
     if (!enabled || !imageUrl) return null
@@ -93,48 +109,75 @@ export default function HomeAnnouncementModal({
                     <div style={{
                         position: 'absolute',
                         bottom: '16px',
+                        left: '16px',
                         right: '16px',
                         display: 'flex',
-                        gap: '0.5rem',
+                        gap: '0.75rem',
+                        flexWrap: 'wrap',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
                     }}>
-                        {ctaEnabled && (
-                            <Link
-                                href={ctaHref}
-                                style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '0.35rem',
-                                    background: 'linear-gradient(135deg, #f97316, #ef4444)',
-                                    color: 'white',
-                                    padding: '0.75rem 1.35rem',
-                                    borderRadius: '9999px',
-                                    textDecoration: 'none',
-                                    fontWeight: 800,
-                                    letterSpacing: '0.02em',
-                                    boxShadow: '0 10px 18px rgba(239,68,68,0.35)',
-                                }}
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            {ctaEnabled && (
+                                <Link
+                                    href={ctaHref}
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '0.35rem',
+                                        background: 'linear-gradient(135deg, #f97316, #ef4444)',
+                                        color: 'white',
+                                        padding: '0.75rem 1.35rem',
+                                        borderRadius: '9999px',
+                                        textDecoration: 'none',
+                                        fontWeight: 800,
+                                        letterSpacing: '0.02em',
+                                        boxShadow: '0 10px 18px rgba(239,68,68,0.35)',
+                                    }}
+                                    onClick={handleClose}
+                                >
+                                    {ctaLabel}
+                                    <span style={{ fontSize: '1.1rem' }}>→</span>
+                                </Link>
+                            )}
+                            <button
                                 onClick={handleClose}
+                                style={{
+                                    background: 'rgba(0,0,0,0.65)',
+                                    color: 'white',
+                                    padding: '0.75rem 1.1rem',
+                                    borderRadius: '9999px',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    fontWeight: 700,
+                                    boxShadow: '0 6px 12px rgba(0,0,0,0.25)',
+                                }}
                             >
-                                {ctaLabel}
-                                <span style={{ fontSize: '1.1rem' }}>→</span>
-                            </Link>
-                        )}
-                        <button
-                            onClick={handleClose}
-                            style={{
-                                background: 'rgba(0,0,0,0.65)',
-                                color: 'white',
-                                padding: '0.75rem 1.1rem',
-                                borderRadius: '9999px',
-                                border: 'none',
-                                cursor: 'pointer',
-                                fontWeight: 700,
-                                boxShadow: '0 6px 12px rgba(0,0,0,0.25)',
-                            }}
-                        >
-                            關閉
-                        </button>
+                                關閉
+                            </button>
+                        </div>
+
+                        <label style={{
+                            display: 'inline-flex',
+                            gap: '0.45rem',
+                            alignItems: 'center',
+                            background: 'rgba(0,0,0,0.55)',
+                            color: 'white',
+                            padding: '0.55rem 0.9rem',
+                            borderRadius: '0.75rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            userSelect: 'none'
+                        }}>
+                            <input
+                                type="checkbox"
+                                checked={dontShowToday}
+                                onChange={(e) => setDontShowToday(e.target.checked)}
+                                style={{ width: '18px', height: '18px' }}
+                            />
+                            今日不再顯示
+                        </label>
                     </div>
                 </div>
             </div>
