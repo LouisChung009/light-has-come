@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
+import { getDb, BannerSlide, SiteContent } from '@/utils/db'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import BannerUploadForm from './BannerUploadForm'
@@ -6,22 +6,18 @@ import BannerSlideCard from './BannerSlideCard'
 import HeroStyleForm from './HeroStyleForm'
 
 export default async function BannerManagement() {
-    const supabase = await createClient()
+    // Auth check handled by middleware
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-        redirect('/admin')
-    }
+    const sql = getDb()
 
-    const [{ data: banners }, { data: heroStyleRows }] = await Promise.all([
-        supabase
-            .from('banner_slides')
-            .select('*')
-            .order('display_order', { ascending: true }),
-        supabase
-            .from('site_content')
-            .select('id, content')
-            .in('id', [
+    const [banners, heroStyleRows] = await Promise.all([
+        sql`
+            SELECT * FROM banner_slides 
+            ORDER BY display_order ASC
+        ` as unknown as BannerSlide[],
+        sql`
+            SELECT id, content FROM site_content 
+            WHERE id IN (
                 'home_hero_title_color',
                 'home_hero_subtitle_color',
                 'home_hero_title_size',
@@ -30,12 +26,13 @@ export default async function BannerManagement() {
                 'home_hero_cta_label',
                 'home_hero_cta_href',
                 'home_hero_cta_bg',
-                'home_hero_cta_text_color',
-            ])
+                'home_hero_cta_text_color'
+            )
+        ` as unknown as SiteContent[]
     ])
 
     const heroStyleMap = new Map<string, string>()
-    heroStyleRows?.forEach((row: { id: string, content: string }) => heroStyleMap.set(row.id, row.content))
+    heroStyleRows?.forEach((row) => heroStyleMap.set(row.id, row.content))
 
     const heroStyle = {
         titleColor: heroStyleMap.get('home_hero_title_color') || '#FFFFFF',

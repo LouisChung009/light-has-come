@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/utils/supabase/client'
+import { submitRegistration } from './actions'
 
 export default function RegisterForm() {
     const [formData, setFormData] = useState({
@@ -52,23 +52,20 @@ export default function RegisterForm() {
         }
 
         try {
-            const supabase = createClient()
+            const result = await submitRegistration({
+                parentName: formData.parentName,
+                phone: formData.phone,
+                email: formData.email,
+                childNickname: formData.childNickname,
+                childAge: parseInt(formData.childAge),
+                classType: formData.classType,
+                contactTime: formData.contactTime,
+                message: formData.message
+            });
 
-            const { error } = await supabase
-                .from('registrations')
-                .insert({
-                    parent_name: formData.parentName,
-                    phone: formData.phone,
-                    email: formData.email,
-                    child_nickname: formData.childNickname,
-                    child_age: parseInt(formData.childAge),
-                    class_type: formData.classType,
-                    contact_time: formData.contactTime,
-                    message: formData.message,
-                    status: 'pending'
-                })
-
-            if (error) throw error
+            if (result.error) {
+                throw new Error(result.error)
+            }
 
             setIsSuccess(true)
             setFormData({
@@ -81,9 +78,9 @@ export default function RegisterForm() {
                 contactTime: '',
                 message: ''
             })
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error submitting form:', error)
-            setErrorMsg('報名失敗，請稍後再試，或直接來電聯繫。')
+            setErrorMsg(error.message || '報名失敗，請稍後再試，或直接來電聯繫。')
         } finally {
             setIsSubmitting(false)
         }

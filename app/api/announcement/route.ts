@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+import { getDb } from '@/utils/db'
+import { getSession } from '@/utils/auth-neon'
 
 export async function POST(request: Request) {
     try {
-        const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
+        const session = await getSession()
+        if (!session?.user) {
             return NextResponse.json({ error: '未登入' }, { status: 401 })
         }
 
@@ -32,18 +32,16 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: '請填寫報名按鈕的網址' }, { status: 400 })
         }
 
-        const { error } = await supabase
-            .from('site_content')
-            .upsert({
-                id: 'home_announcement',
-                category: 'announcement',
-                label: '首頁彈窗',
-                content: JSON.stringify(payload),
-            })
+        const sql = getDb()
 
-        if (error) {
-            return NextResponse.json({ error: error.message }, { status: 500 })
-        }
+        await sql`
+            INSERT INTO site_content (id, category, label, content, updated_at)
+            VALUES ('home_announcement', 'announcement', '首頁彈窗', ${JSON.stringify(payload)}, NOW())
+            ON CONFLICT (id) 
+            DO UPDATE SET 
+                content = EXCLUDED.content,
+                updated_at = NOW()
+        `
 
         return NextResponse.json({ ok: true })
     } catch (error) {

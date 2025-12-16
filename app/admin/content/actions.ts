@@ -1,31 +1,54 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { getDb } from '@/utils/db'
 import { revalidatePath } from 'next/cache'
+import { uploadToExternalStorage, deleteFromExternalStorage, extractExternalKeyFromUrl } from '@/utils/storage/external'
 
 export async function updateContent(id: string, content: string) {
-    const supabase = await createClient()
+    const sql = getDb()
 
-    const { error } = await supabase
-        .from('site_content')
-        .update({
-            content,
-            updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-
-    if (error) {
-        return { error: error.message }
+    try {
+        await sql`
+            UPDATE site_content 
+            SET content = ${content}, updated_at = NOW()
+            WHERE id = ${id}
+        `
+        revalidatePath('/')
+        revalidatePath('/courses')
+        revalidatePath('/about')
+    } catch (error) {
+        console.error('Error updating content:', error)
+        return { error: 'Failed to update content' }
     }
+}
 
-    revalidatePath('/')
-    revalidatePath('/courses')
-    revalidatePath('/about')
+export async function updateGalleryIntro(formData: FormData) {
+    const title = formData.get('title') as string
+    const subtitle = formData.get('subtitle') as string
+
+    if (!title && !subtitle) return
+
+    const sql = getDb()
+
+    try {
+        const content = { title, subtitle }
+        await sql`
+            INSERT INTO site_content (id, category, label, content, updated_at)
+            VALUES ('home_gallery_intro', 'gallery', '相簿介紹', ${JSON.stringify(content)}, NOW())
+            ON CONFLICT (id)
+            DO UPDATE SET
+                content = EXCLUDED.content,
+                updated_at = NOW()
+        `
+        revalidatePath('/')
+        revalidatePath('/gallery')
+    } catch (error) {
+        console.error('Error updating gallery intro:', error)
+        return { error: 'Failed to update gallery intro' }
+    }
 }
 
 export async function createBannerSlide(formData: FormData) {
-    const supabase = await createClient()
-
     const file = formData.get('file') as File
     const title = formData.get('title') as string
     const subtitle = formData.get('subtitle') as string
@@ -36,86 +59,66 @@ export async function createBannerSlide(formData: FormData) {
         return { error: 'No file uploaded' }
     }
 
-    // Determine media type
-    const mediaType = file.type.startsWith('video/') ? 'video' : 'image'
+    try {
+        // Upload to R2
+        const fileExt = file.name.split('.').pop()
+        const fileName = `banners/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+        const buffer = new Uint8Array(await file.arrayBuffer())
 
-    // Upload to storage (convert to buffer for Node env)
-    const fileExt = file.name.split('.').pop()
-    const fileName = `banners/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-    const buffer = Buffer.from(await file.arrayBuffer())
+        const publicUrl = await uploadToExternalStorage(fileName, buffer, file.type)
+        const mediaType = file.type.startsWith('video/') ? 'video' : 'image'
 
-    const { error: uploadError } = await supabase.storage
-        .from('gallery')
-        .upload(fileName, buffer, {
-            contentType: file.type || undefined,
-            upsert: true,
-        })
+        // Insert into Neon
+        const sql = getDb()
+        await sql`
+            INSERT INTO banner_slides (title, subtitle, media_url, media_type, link_url, display_order, is_active)
+            VALUES (${title}, ${subtitle}, ${publicUrl}, ${mediaType}, ${linkUrl || null}, ${displayOrder}, true)
+        `
 
-    if (uploadError) {
-        return { error: uploadError.message }
+        revalidatePath('/admin/banner')
+        revalidatePath('/')
+    } catch (error) {
+        console.error('Error creating banner slide:', error)
+        return { error: 'Failed to create banner slide' }
     }
-
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-        .from('gallery')
-        .getPublicUrl(fileName)
-
-    // Insert into database
-    const { error: dbError } = await supabase
-        .from('banner_slides')
-        .insert({
-            title,
-            subtitle,
-            media_url: publicUrl,
-            media_type: mediaType,
-            link_url: linkUrl || null,
-            display_order: displayOrder,
-            is_active: true
-        })
-
-    if (dbError) {
-        return { error: dbError.message }
-    }
-
-    revalidatePath('/admin/banner')
-    revalidatePath('/')
 }
 
 export async function deleteBannerSlide(id: string, mediaUrl: string) {
-    const supabase = await createClient()
+    try {
+        // Delete from R2
+        const key = extractExternalKeyFromUrl(mediaUrl)
+        if (key) {
+            await deleteFromExternalStorage(key)
+        }
 
-    // Delete from storage
-    const path = mediaUrl.split('/gallery/')[1]
-    if (path) {
-        await supabase.storage.from('gallery').remove([path])
+        // Delete from Neon
+        const sql = getDb()
+        await sql`
+            DELETE FROM banner_slides
+            WHERE id = ${id}
+        `
+
+        revalidatePath('/admin/banner')
+        revalidatePath('/')
+    } catch (error) {
+        console.error('Error deleting banner slide:', error)
+        return { error: 'Failed to delete banner slide' }
     }
-
-    // Delete from database
-    const { error } = await supabase
-        .from('banner_slides')
-        .delete()
-        .eq('id', id)
-
-    if (error) {
-        return { error: error.message }
-    }
-
-    revalidatePath('/admin/banner')
-    revalidatePath('/')
 }
 
 export async function toggleBannerSlide(id: string, isActive: boolean) {
-    const supabase = await createClient()
+    try {
+        const sql = getDb()
+        await sql`
+            UPDATE banner_slides
+            SET is_active = ${isActive}
+            WHERE id = ${id}
+        `
 
-    const { error } = await supabase
-        .from('banner_slides')
-        .update({ is_active: isActive })
-        .eq('id', id)
-
-    if (error) {
-        return { error: error.message }
+        revalidatePath('/admin/banner')
+        revalidatePath('/')
+    } catch (error) {
+        console.error('Error toggling banner slide:', error)
+        return { error: 'Failed to toggle banner slide' }
     }
-
-    revalidatePath('/admin/banner')
-    revalidatePath('/')
 }

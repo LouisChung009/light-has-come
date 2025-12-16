@@ -3,17 +3,7 @@
 import { updateRegistrationStatus, deleteRegistration } from './actions'
 import { useState } from 'react'
 
-interface Registration {
-    id: string
-    created_at: string
-    parent_name: string
-    phone: string
-    child_nickname: string
-    child_age: number
-    class_type: string
-    status: string
-    message?: string
-}
+import { Registration } from '@/utils/db'
 
 export default function RegistrationRow({ reg }: { reg: Registration }) {
     const [isUpdating, setIsUpdating] = useState(false)

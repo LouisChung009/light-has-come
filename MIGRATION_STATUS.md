@@ -65,14 +65,23 @@ SELECT * FROM photos;
 然後複製 JSON 結果，轉換為 INSERT 語句匯入 Neon。
 
 ### 3. 後台管理頁面遷移
-以下後台頁面仍在使用 Supabase，需要更新為 Neon：
-- `app/admin/content/` - 內容編輯
-- `app/admin/banner/` - 橫幅管理
-- `app/admin/announcement/` - 公告管理
-- `app/admin/dashboard/` - 儀表板
-- `app/register/RegisterForm.tsx` - 報名表單
+- [x] `app/admin/content/` - 內容編輯
+- [x] `app/admin/banner/` - 橫幅管理
+- [x] `app/admin/announcement/` - 公告管理
 
-### 4. 清理工作
+### 4. Auth & Admin Panel (COMPLETED)
+- [x] **New Auth System**: Replaced Supabase Auth with custom `jose` + `bcryptjs` implementation on Neon.
+- [x] **Middleware**: Updated to verify Neon sessions (JWT in cookies).
+- [x] **Admin Actions**: `login`, `logout` and all protected actions now use Neon auth.
+- [x] **Admin Pages**: Removed all server-side Supabase dependency.
+- [x] `app/admin/dashboard/` - 儀表板
+- [x] `app/register/RegisterForm.tsx` - 報名表單
+
+### 5. Storage Cleanup (PENDING)
+- [ ] **Delete Supabase Project**: Once confident, the Supabase project can be archived.
+- [ ] **Environment Variables**: Clean up generic Supabase variables from Vercel.
+
+### 6. 清理工作
 - [ ] 移除 debug 訊息（`app/gallery/page.tsx` 的藍色 DEBUG 區塊）
 - [ ] 移除 `app/api/debug-db/route.ts`
 - [ ] 確認所有功能正常後，可考慮移除 Supabase 相關程式碼

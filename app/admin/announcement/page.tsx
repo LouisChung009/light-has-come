@@ -1,14 +1,15 @@
-import { createClient } from '@/utils/supabase/server'
+import { getDb, SiteContent } from '@/utils/db'
 import AnnouncementForm from './AnnouncementForm'
 
 async function getAnnouncement() {
-    const supabase = await createClient()
-    const { data } = await supabase
-        .from('site_content')
-        .select('content')
-        .eq('id', 'home_announcement')
-        .eq('category', 'announcement')
-        .maybeSingle()
+    const sql = getDb()
+    const result = await sql`
+        SELECT content FROM site_content 
+        WHERE id = 'home_announcement' AND category = 'announcement'
+        LIMIT 1
+    ` as SiteContent[]
+
+    const data = result[0]
 
     const defaultConfig = {
         enabled: false,

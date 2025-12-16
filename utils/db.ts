@@ -64,10 +64,12 @@ export type SiteContent = {
 
 export type BannerSlide = {
     id: string
-    title: string
-    subtitle: string
+    title: string | null
+    subtitle: string | null
     media_url: string
     media_type: string
     link_url: string | null
+    display_order: number
+    is_active: boolean
 }
 

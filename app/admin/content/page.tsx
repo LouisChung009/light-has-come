@@ -1,48 +1,34 @@
-import { createClient } from '@/utils/supabase/server'
+import { getDb, SiteContent } from '@/utils/db'
 import { redirect } from 'next/navigation'
 import ContentEditor from './ContentEditor'
 import Link from 'next/link'
 
 export default async function ContentManagement() {
-    const supabase = await createClient()
+    // Auth check is handled by middleware
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-        redirect('/admin')
-    }
-
-    type ContentItem = {
-        id: string
-        category: string
-        section: string | null
-        label: string
-        content: string
-        content_type: string
-    }
-
-    const { data: contents } = await supabase
-        .from('site_content')
-        .select('*')
-        .order('category', { ascending: true })
-        .order('section', { ascending: true })
-        .order('display_order', { ascending: true })
-        .returns<ContentItem[]>()
+    // Fetch content from Neon
+    const sql = getDb()
+    const contents = await sql`
+        SELECT * FROM site_content
+        ORDER BY category ASC, section ASC, display_order ASC
+    ` as SiteContent[]
 
     // Group by category and section
-    const groupedContents: Record<string, ContentItem[]> = (contents ?? []).reduce((acc, item) => {
+    const groupedContents: Record<string, SiteContent[]> = (contents ?? []).reduce((acc, item) => {
         const key = `${item.category}::${item.section || 'general'}`
         if (!acc[key]) {
             acc[key] = []
         }
         acc[key].push(item)
         return acc
-    }, {} as Record<string, ContentItem[]>)
+    }, {} as Record<string, SiteContent[]>)
 
     const categoryNames: Record<string, string> = {
         home: '首頁',
         courses: '課程介紹',
         about: '關於我們',
-        contact: '聯絡資訊'
+        contact: '聯絡資訊',
+        announcement: '公告'
     }
 
     const sectionNames: Record<string, string> = {
@@ -80,7 +66,7 @@ export default async function ContentManagement() {
                 </Link>
             </div>
 
-            {Object.entries(groupedContents).map(([key, items]: [string, ContentItem[]]) => {
+            {Object.entries(groupedContents).map(([key, items]: [string, SiteContent[]]) => {
                 const [category, section] = key.split('::')
                 return (
                     <div key={key} style={{ marginBottom: '3rem' }}>

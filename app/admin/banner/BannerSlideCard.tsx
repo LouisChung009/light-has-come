@@ -5,18 +5,9 @@ import { updateBannerSlide } from './actions'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 
-interface Banner {
-    id: string
-    title: string | null
-    subtitle: string | null
-    media_url: string
-    media_type: string
-    link_url: string | null
-    display_order: number
-    is_active: boolean
-}
+import { BannerSlide } from '@/utils/db'
 
-export default function BannerSlideCard({ banner }: { banner: Banner }) {
+export default function BannerSlideCard({ banner }: { banner: BannerSlide }) {
     const [isProcessing, setIsProcessing] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const [title, setTitle] = useState(banner.title || '')

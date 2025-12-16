@@ -1,19 +1,15 @@
-import { createClient } from '@/utils/supabase/server'
+import { getDb, Registration } from '@/utils/db'
 import { redirect } from 'next/navigation'
 import RegistrationRow from './RegistrationRow'
 
 export default async function Dashboard() {
-    const supabase = await createClient()
+    // Auth check handled by middleware
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-        redirect('/admin')
-    }
-
-    const { data: registrations } = await supabase
-        .from('registrations')
-        .select('*')
-        .order('created_at', { ascending: false })
+    const sql = getDb()
+    const registrations = await sql`
+        SELECT * FROM registrations 
+        ORDER BY created_at DESC
+    ` as Registration[]
 
     return (
         <div style={{ padding: '2rem' }}>

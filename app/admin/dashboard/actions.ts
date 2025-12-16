@@ -1,34 +1,35 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { getDb } from '@/utils/db'
 import { revalidatePath } from 'next/cache'
 
 export async function updateRegistrationStatus(id: string, status: string) {
-    const supabase = await createClient()
+    const sql = getDb()
 
-    const { error } = await supabase
-        .from('registrations')
-        .update({ status })
-        .eq('id', id)
-
-    if (error) {
-        return { error: error.message }
+    try {
+        await sql`
+            UPDATE registrations
+            SET status = ${status}
+            WHERE id = ${id}
+        `
+        revalidatePath('/admin/dashboard')
+    } catch (error) {
+        console.error('Error updating registration status:', error)
+        return { error: 'Failed to update status' }
     }
-
-    revalidatePath('/admin/dashboard')
 }
 
 export async function deleteRegistration(id: string) {
-    const supabase = await createClient()
+    const sql = getDb()
 
-    const { error } = await supabase
-        .from('registrations')
-        .delete()
-        .eq('id', id)
-
-    if (error) {
-        return { error: error.message }
+    try {
+        await sql`
+            DELETE FROM registrations
+            WHERE id = ${id}
+        `
+        revalidatePath('/admin/dashboard')
+    } catch (error) {
+        console.error('Error deleting registration:', error)
+        return { error: 'Failed to delete registration' }
     }
-
-    revalidatePath('/admin/dashboard')
 }

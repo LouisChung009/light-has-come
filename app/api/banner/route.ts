@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getDb } from '@/utils/db'
 import { uploadToExternalStorage } from '@/utils/storage/external'
-import { createClient } from '@/utils/supabase/server'
+import { getSession } from '@/utils/auth-neon'
 
 // GET: Fetch active banners (public)
 export async function GET() {
@@ -23,10 +23,8 @@ export async function GET() {
 // POST: Upload new banner (requires auth)
 export async function POST(request: Request) {
     try {
-        // Check auth with Supabase (for now, we still use Supabase Auth)
-        const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
+        const session = await getSession()
+        if (!session?.user) {
             return NextResponse.json({ error: '未登入' }, { status: 401 })
         }
 
