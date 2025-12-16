@@ -1,32 +1,51 @@
-
 import { createClient } from '@supabase/supabase-js'
 import fs from 'fs'
 import path from 'path'
 import dotenv from 'dotenv'
 import sharp from 'sharp'
+import * as faceapi from 'face-api.js'
+import * as tf from '@tensorflow/tfjs'
+import { Canvas, Image, ImageData, loadImage } from 'canvas'
+import { isExternalStorageEnabled, uploadToExternalStorage } from '../utils/storage/external'
 
 // Load environment variables
 dotenv.config({ path: '.env.local' })
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('❌ Missing Supabase credentials in .env.local')
+if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('❌ Missing Supabase credentials. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local')
     process.exit(1)
 }
 
-// Use Service Role Key if available (Bypasses RLS), otherwise fall back to Anon Key
-const supabaseKey = supabaseServiceKey || supabaseAnonKey
-const supabase = createClient(supabaseUrl, supabaseKey)
+// Always use Service Role to bypass RLS for batch operations
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
+console.log('✅ Running with Service Role Key (Admin Mode)')
 
-if (!supabaseServiceKey) {
-    console.warn('⚠️  Warning: SUPABASE_SERVICE_ROLE_KEY not found.')
-    console.warn('   The script is running with the Anonymous Key, which may be blocked by RLS policies.')
-    console.warn('   If you see "row-level security policy" errors, please add SUPABASE_SERVICE_ROLE_KEY to your .env.local file.')
-} else {
-    console.log('🔐 Running with Service Role Key (Admin Mode)')
+// AI 人臉偵測（避免個人正臉特寫）: 使用 face-api + tfjs CPU backend
+let faceModelReady = false
+const FACE_MODEL_URL = process.env.FACE_MODEL_URL || 'https://justadudewhohacks.github.io/face-api.js/models'
+faceapi.env.monkeyPatch({ Canvas: Canvas as any, Image, ImageData } as any)
+
+async function ensureFaceModel() {
+    if (faceModelReady) return
+    await tf.setBackend('cpu')
+    await tf.ready()
+    await faceapi.nets.tinyFaceDetector.loadFromUri(FACE_MODEL_URL)
+    faceModelReady = true
+}
+
+async function hasFace(buffer: Buffer) {
+    try {
+        await ensureFaceModel()
+        const img = await loadImage(buffer)
+        const detections = await faceapi.detectAllFaces(img as any, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.6 }))
+        return detections.length > 0
+    } catch (err) {
+        console.error('⚠️ Face detection failed, skipping detection for this image:', err)
+        return false
+    }
 }
 
 const SOURCE_DIR = 'line_albums'
@@ -34,9 +53,59 @@ const COMPLETED_DIR = 'line_albums/_completed'
 
 const HASH_SIZE = 16
 
+// 支援的分類代碼（以資料夾結尾的片段為主，例如 2021-10-09_收穫家庭感恩禮拜_special）
+const CATEGORY_ALIASES: Record<string, string> = {
+    craft: 'craft',
+    手作: 'craft',
+    music: 'music',
+    worship: 'music',
+    音樂: 'music',
+    science: 'science',
+    科學: 'science',
+    outdoor: 'outdoor',
+    戶外: 'outdoor',
+    special: 'special',
+    活動: 'special',
+    其他: 'special',
+}
+
+function parseFolderMeta(folderName: string) {
+    // 規則：date_title_category ；date 取第一個 YYYY-MM-DD（允許 . 或 /），category 為最後一段
+    const parts = folderName.split('_').filter(Boolean)
+    const datePart = parts.find(p => /(\d{4}[./-]\d{1,2}[./-]\d{1,2})/.test(p))
+    const normalizedDate = datePart
+        ? normalizeDate(datePart)
+        : new Date().toISOString().slice(0, 10)
+
+    const categoryRaw = parts.length > 1 ? parts[parts.length - 1] : ''
+    const category = pickCategory(categoryRaw)
+
+    // 標題 = 去掉日期與分類後的剩餘片段；如果空，退回整個資料夾名稱
+    const titleParts = parts.filter(p => p !== datePart && p !== categoryRaw)
+    const title = titleParts.join(' ').trim() || folderName
+
+    return { title, date: normalizedDate, category }
+}
+
+function pickCategory(cat?: string) {
+    if (!cat) return 'special'
+    const key = cat.toLowerCase()
+    return CATEGORY_ALIASES[key] || CATEGORY_ALIASES[cat] || 'special'
+}
+
+function normalizeDate(dateStr: string) {
+    const cleaned = dateStr.replace(/[./]/g, '-')
+    const match = cleaned.match(/(\d{4})-?(\d{1,2})-?(\d{1,2})/)
+    if (!match) return new Date().toISOString().slice(0, 10)
+    const [, y, m, d] = match
+    const month = m.padStart(2, '0')
+    const day = d.padStart(2, '0')
+    return `${y}-${month}-${day}`
+}
+
 async function processAllAlbums() {
     console.log('🚀 Starting Batch Upload Process with AI Filtering...')
-    console.log(`📂 Scanning folder: ${SOURCE_DIR}\n`)
+    console.log(`🗂️ Scanning folder: ${SOURCE_DIR}\n`)
 
     if (!fs.existsSync(SOURCE_DIR)) {
         fs.mkdirSync(SOURCE_DIR)
@@ -52,7 +121,7 @@ async function processAllAlbums() {
     })
 
     if (albumFolders.length === 0) {
-        console.log('⚠️ No album folders found in "line_albums".')
+        console.log('📭 No album folders found in "line_albums".')
         console.log('👉 Please create a folder inside "line_albums" (e.g., "2024-01-01 New Year") and put photos in it.')
         return
     }
@@ -63,7 +132,7 @@ async function processAllAlbums() {
         await processAlbum(folderName)
     }
 
-    console.log('\n✨ All tasks finished!')
+    console.log('\n✅ All tasks finished!')
 }
 
 // Simple Perceptual Hash
@@ -95,11 +164,10 @@ function getHammingDistance(hash1: string, hash2: string): number {
 async function processAlbum(folderName: string) {
     const folderPath = path.join(SOURCE_DIR, folderName)
     console.log(`----------------------------------------`)
-    console.log(`📸 Processing Album: "${folderName}"`)
+    console.log(`📁 Processing Album: "${folderName}"`)
 
-    const dateMatch = folderName.match(/^(\d{4}-\d{2}-\d{2})/)
-    const date = dateMatch ? dateMatch[1] : new Date().toISOString().split('T')[0]
-    const title = folderName
+    const meta = parseFolderMeta(folderName)
+    const { title, date, category } = meta
 
     // 0. Check if album already exists
     const { data: existingAlbum } = await supabase
@@ -109,15 +177,13 @@ async function processAlbum(folderName: string) {
         .single()
 
     if (existingAlbum) {
-        console.log(`⚠️ Album "${title}" already exists online.`)
+        console.log(`ℹ️ Album "${title}" already exists online.`)
         console.log(`   Skipping upload to avoid duplicates.`)
 
         // Move to _completed so it doesn't clutter
         const completedPath = path.join(COMPLETED_DIR, folderName)
         try {
             if (fs.existsSync(completedPath)) {
-                // If folder already exists in _completed, rename source to avoid collision or just remove source?
-                // Safer to rename source with timestamp
                 const timestampedName = `${folderName}_duplicate_${Date.now()}`
                 fs.renameSync(folderPath, path.join(COMPLETED_DIR, timestampedName))
             } else {
@@ -131,7 +197,6 @@ async function processAlbum(folderName: string) {
     }
 
     // 1. Create Album
-    // Generate ID manually as DB doesn't auto-generate it (consistent with Admin UI)
     const id = `${date}-${Math.random().toString(36).substring(2, 8)}`
 
     const { data: album, error: albumError } = await supabase
@@ -140,7 +205,7 @@ async function processAlbum(folderName: string) {
             id: id,
             title: title,
             date: date,
-            category: 'activity',
+            category: category,
             description: 'Imported from LINE (AI Filtered)',
             cover_color: '#4A90C8'
         })
@@ -156,9 +221,9 @@ async function processAlbum(folderName: string) {
 
     // 2. Read and Filter photos
     const files = fs.readdirSync(folderPath).filter(file => {
-        if (file.startsWith('.')) return false // Ignore hidden files and macOS metadata (._*)
+        if (file.startsWith('.')) return false
         const ext = path.extname(file).toLowerCase()
-        return ['.jpg', '.jpeg', '.png', '.webp', '.heic'].includes(ext)
+        return ['.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif'].includes(ext)
     })
 
     console.log(`   Found ${files.length} photos. Analyzing for duplicates...`)
@@ -172,24 +237,13 @@ async function processAlbum(folderName: string) {
         const hash = await computeHash(filePath)
 
         if (!hash) {
-            filesToUpload.push(file) // If hash fails, upload anyway to be safe
+            filesToUpload.push(file)
             continue
         }
 
         let isDuplicate = false
         for (const existingHash of processedHashes) {
             const distance = getHammingDistance(hash, existingHash)
-            // Threshold check: if distance is small, images are very similar
-            // HASH_SIZE 16x16 = 256 pixels. Hex string length = 512 chars.
-            // A threshold of 5-10 differences out of 512 is very strict (near exact).
-            // Let's use a percentage based threshold for robustness.
-            // Actually, simple pixel comparison is sensitive.
-            // Let's use a simpler average hash approach if this is too strict, 
-            // but for burst shots (identical scene, slight movement), pixel diff is usually small.
-
-            // Let's try a simpler approach: Average Hash logic manually
-            // But raw pixel comparison is fine for "burst shots".
-            // Let's relax threshold a bit. 512 chars. 5% diff = ~25 chars.
             if (distance < 30) {
                 isDuplicate = true
                 break
@@ -198,15 +252,15 @@ async function processAlbum(folderName: string) {
 
         if (isDuplicate) {
             skippedCount++
-            process.stdout.write('S') // S for Skipped
+            process.stdout.write('S')
         } else {
             processedHashes.push(hash)
             filesToUpload.push(file)
-            process.stdout.write('.') // . for Kept
+            process.stdout.write('.')
         }
     }
 
-    console.log(`\n   🤖 AI Analysis Complete:`)
+    console.log(`\n   ✅ AI Analysis Complete:`)
     console.log(`   - Total: ${files.length}`)
     console.log(`   - Kept: ${filesToUpload.length}`)
     console.log(`   - Skipped (Similar): ${skippedCount}`)
@@ -217,36 +271,63 @@ async function processAlbum(folderName: string) {
     for (const file of filesToUpload) {
         const filePath = path.join(folderPath, file)
         const fileBuffer = fs.readFileSync(filePath)
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}${path.extname(file)}`
+        const fileExt = path.extname(file).toLowerCase()
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}${fileExt}`
         const storagePath = `${album.id}/${fileName}`
 
+        const contentType = (() => {
+            switch (fileExt) {
+                case '.png': return 'image/png'
+                case '.webp': return 'image/webp'
+                case '.heic': return 'image/heic'
+                case '.heif': return 'image/heif'
+                case '.jpeg':
+                case '.jpg':
+                default: return 'image/jpeg'
+            }
+        })()
+
         try {
-            const { error: uploadError } = await supabase.storage
-                .from('gallery')
-                .upload(storagePath, fileBuffer, {
-                    contentType: 'image/jpeg',
-                    upsert: false
-                })
+            // 檢測人臉，避免上傳個人正臉特寫
+            const faceFound = await hasFace(fileBuffer)
+            if (faceFound) {
+                console.log(`\n   ⚠️ Skip ${file} (face detected)`)
+                continue
+            }
 
-            if (uploadError) throw uploadError
+            let publicUrl: string
 
-            const { data: { publicUrl } } = supabase.storage
-                .from('gallery')
-                .getPublicUrl(storagePath)
+            if (isExternalStorageEnabled()) {
+                publicUrl = await uploadToExternalStorage(storagePath, fileBuffer, contentType)
+            } else {
+                const { error: uploadError } = await supabase.storage
+                    .from('gallery')
+                    .upload(storagePath, fileBuffer, {
+                        contentType,
+                        upsert: false
+                    })
+
+                if (uploadError) throw uploadError
+
+                const { data: { publicUrl: supabaseUrl } } = supabase.storage
+                    .from('gallery')
+                    .getPublicUrl(storagePath)
+                publicUrl = supabaseUrl
+            }
 
             const { error: dbError } = await supabase
                 .from('photos')
                 .insert({
                     album_id: album.id,
                     src: publicUrl,
-                    // caption: '', // Removed as column doesn't exist
+                    alt: file,
                     width: 800,
                     height: 600
                 })
 
             if (dbError) throw dbError
             successCount++
-            process.stdout.write('↑') // Arrow for upload
+            process.stdout.write('↑')
         } catch (err) {
             console.error(`\n   ❌ Error uploading ${file}:`, err)
         }

@@ -47,8 +47,9 @@ export default function SiteHeader() {
         .header-container {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 0 0.75rem;
-          height: 56px;
+          padding: 0.75rem 1.25rem 1rem;
+          height: auto;
+          min-height: 60px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -68,7 +69,7 @@ export default function SiteHeader() {
         /* Logo Styles */
         .logo-link {
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           gap: 4px;
           text-decoration: none;
           flex: 1 1 auto;
@@ -78,51 +79,53 @@ export default function SiteHeader() {
 
         .logo-icon-wrapper {
           position: relative;
-          width: 28px;
-          height: 28px;
+          width: 42px;
+          height: 42px;
           flex-shrink: 0;
         }
 
         .logo-text-group {
           display: flex;
           flex-direction: column;
-          justify-content: center;
-          line-height: 1;
-          text-align: center;
-          gap: 0px;
+          justify-content: space-between;
+          align-items: flex-start;
+          line-height: 1.05;
+          text-align: left;
+          gap: 2px;
+          height: 42px;
         }
 
         .logo-title {
           font-family: 'Huninn', 'jf-openhuninn-2.0', sans-serif;
-          font-size: 14px;
+          font-size: 18px;
           font-weight: 700;
           color: #333;
           margin: 0;
           letter-spacing: 0em;
           white-space: nowrap;
-          line-height: 1.2;
+          line-height: 1.15;
         }
 
         .logo-subtitle {
           font-family: 'Noto Sans TC', sans-serif;
-          font-size: 7px;
+          font-size: 14px;
           font-weight: 700;
           color: #4A90C8;
           white-space: nowrap;
           margin: 0;
           letter-spacing: 0.05em;
-          line-height: 1;
+          line-height: 1.05;
         }
 
         .logo-subtitle-full {
           font-family: 'Noto Sans TC', sans-serif;
-          font-size: 7px;
+          font-size: 14px;
           font-weight: 500;
           color: #666;
           white-space: nowrap;
           margin: 0;
           letter-spacing: 0.02em;
-          line-height: 1;
+          line-height: 1.05;
         }
 
         /* Desktop container - hidden on mobile */
@@ -145,7 +148,7 @@ export default function SiteHeader() {
           color: #666;
           text-decoration: none;
           font-weight: 500;
-          font-size: 1rem;
+          font-size: 1.125rem;
           transition: color 0.2s;
           white-space: nowrap;
         }
@@ -158,11 +161,11 @@ export default function SiteHeader() {
         .btn-register {
           background: #4A90C8;
           color: white;
-          padding: 0.6rem 1.5rem;
+          padding: 0.85rem 1.75rem;
           border-radius: 50px;
           text-decoration: none;
           font-weight: 700;
-          font-size: 0.95rem;
+          font-size: 1.05rem;
           transition: all 0.2s;
           box-shadow: 0 4px 10px rgba(74, 144, 200, 0.2);
           white-space: nowrap;
@@ -207,13 +210,13 @@ export default function SiteHeader() {
           justify-content: center;
           background: #4A90C8;
           color: white;
-          padding: 5px 10px;
+          padding: 12px 18px;
           border-radius: 9999px;
           text-decoration: none;
           font-weight: 700;
-          font-size: 10px;
+          font-size: 14px;
           white-space: nowrap;
-          box-shadow: 0 2px 6px rgba(74, 144, 200, 0.2);
+          box-shadow: 0 4px 10px rgba(74, 144, 200, 0.25);
           flex-shrink: 0;
           line-height: 1.2;
         }
@@ -250,10 +253,10 @@ export default function SiteHeader() {
           .header-container { height: 88px; padding: 0 1.5rem; }
           .header-mobile-layout { display: none; }
           .header-desktop { display: flex; }
-          .logo-link { gap: 10px; flex: 0 0 auto; justify-content: flex-start; }
+          .logo-link { gap: 10px; flex: 0 0 auto; justify-content: flex-start; align-items: center; }
           .logo-icon-wrapper { width: 52px; height: 52px; }
           .logo-title { font-size: 28px; }
-          .logo-subtitle { font-size: 13px; }
+          .logo-subtitle { font-size: 14px; }
           .logo-subtitle-full { display: none; }
           .nav-desktop { display: flex !important; }
           .mobile-menu-btn { display: none; }

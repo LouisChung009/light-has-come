@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 
 interface BannerSlide {
@@ -13,22 +12,33 @@ interface BannerSlide {
     link_url: string | null
 }
 
-export default function HeroBanner() {
+type HeroStyle = {
+    titleColor: string
+    subtitleColor: string
+    titleSize: string
+    subtitleSize: string
+    textAlign: 'center' | 'left'
+    ctaLabel: string
+    ctaHref: string
+    ctaBg: string
+    ctaTextColor: string
+}
+
+export default function HeroBanner({ heroStyle }: { heroStyle: HeroStyle }) {
     const [banners, setBanners] = useState<BannerSlide[]>([])
     const [currentIndex, setCurrentIndex] = useState(0)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         async function fetchBanners() {
-            const supabase = createClient()
-            const { data } = await supabase
-                .from('banner_slides')
-                .select('*')
-                .eq('is_active', true)
-                .order('display_order', { ascending: true })
-
-            if (data && data.length > 0) {
-                setBanners(data)
+            try {
+                const response = await fetch('/api/banner')
+                const data = await response.json()
+                if (Array.isArray(data) && data.length > 0) {
+                    setBanners(data)
+                }
+            } catch (error) {
+                console.error('Failed to fetch banners:', error)
             }
             setLoading(false)
         }
@@ -41,8 +51,7 @@ export default function HeroBanner() {
 
         const interval = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % banners.length)
-        }, 5000) // 每5秒切換
-
+        }, 5000) // 每秒切換
         return () => clearInterval(interval)
     }, [banners.length])
 
@@ -54,44 +63,57 @@ export default function HeroBanner() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'white'
+                color: heroStyle.titleColor
             }}>
-                載入中...
+                載入中..
             </div>
         )
     }
 
     if (banners.length === 0) {
-        // 如果沒有 Banner，顯示預設內容
+        // 沒有 Banner 時的預設版面
         return (
             <section style={{
                 background: 'linear-gradient(135deg, #4A90C8, #2E5C8A)',
-                color: 'white',
+                color: heroStyle.titleColor,
                 padding: '6rem 1.5rem',
-                textAlign: 'center',
+                textAlign: heroStyle.textAlign,
                 minHeight: '600px',
                 display: 'flex',
                 alignItems: 'center'
             }}>
                 <div className="container">
-                    <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', marginBottom: '1.5rem', fontWeight: 700 }}>
+                    <h1 style={{
+                        fontSize: heroStyle.titleSize,
+                        marginBottom: '1.25rem',
+                        fontWeight: 800,
+                        color: heroStyle.titleColor
+                    }}>
                         讓孩子在愛中成長
                     </h1>
-                    <p style={{ fontSize: 'clamp(1.125rem, 3vw, 1.5rem)', marginBottom: '2rem', opacity: 0.95 }}>
+                    <p style={{
+                        fontSize: heroStyle.subtitleSize,
+                        marginBottom: '2.25rem',
+                        opacity: 0.95,
+                        color: heroStyle.subtitleColor,
+                        fontWeight: 600
+                    }}>
                         大里思恩堂兒童主日學歡迎您
                     </p>
-                    <Link href="/register" style={{
+                    <Link href={heroStyle.ctaHref || '/register'} style={{
                         display: 'inline-block',
-                        background: '#FFD93D',
-                        color: '#333',
-                        padding: '1rem 2.5rem',
+                        background: heroStyle.ctaBg,
+                        color: heroStyle.ctaTextColor,
+                        padding: '1rem 2.75rem',
                         borderRadius: '9999px',
                         textDecoration: 'none',
-                        fontWeight: 700,
+                        fontWeight: 800,
                         fontSize: '1.125rem',
-                        boxShadow: '0 8px 20px rgba(255, 217, 61, 0.3)'
+                        letterSpacing: '0.01em',
+                        boxShadow: '0 8px 20px rgba(0, 0, 0, 0.12)',
+                        border: '2px solid rgba(255,255,255,0.2)'
                     }}>
-                        立即預約體驗
+                        {heroStyle.ctaLabel || '立即預約體驗'}
                     </Link>
                 </div>
             </section>
@@ -151,44 +173,57 @@ export default function HeroBanner() {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5))',
+                        background: 'linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.55))',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: heroStyle.textAlign === 'left' ? 'flex-start' : 'center',
+                        padding: '0 1.25rem'
                     }}>
-                        <div className="container" style={{ textAlign: 'center', color: 'white', padding: '2rem' }}>
+                        <div className="container" style={{
+                            textAlign: heroStyle.textAlign,
+                            color: 'white',
+                            padding: '2.5rem',
+                            maxWidth: '980px',
+                            margin: heroStyle.textAlign === 'left' ? '0 auto 0 0' : '0 auto'
+                        }}>
                             {banner.title && (
                                 <h1 style={{
-                                    fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+                                    fontSize: heroStyle.titleSize,
                                     marginBottom: '1rem',
-                                    fontWeight: 700,
-                                    textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+                                    fontWeight: 800,
+                                    textShadow: '2px 2px 6px rgba(0,0,0,0.45)',
+                                    color: heroStyle.titleColor,
+                                    lineHeight: 1.1
                                 }}>
                                     {banner.title}
                                 </h1>
                             )}
                             {banner.subtitle && (
                                 <p style={{
-                                    fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
-                                    marginBottom: '2rem',
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                    fontSize: heroStyle.subtitleSize,
+                                    marginBottom: '2.25rem',
+                                    textShadow: '1px 1px 3px rgba(0,0,0,0.4)',
+                                    color: heroStyle.subtitleColor,
+                                    fontWeight: 600
                                 }}>
                                     {banner.subtitle}
                                 </p>
                             )}
-                            {banner.link_url && (
-                                <Link href={banner.link_url} style={{
+                            {(banner.link_url || heroStyle.ctaHref) && (
+                                <Link href={banner.link_url || heroStyle.ctaHref} style={{
                                     display: 'inline-block',
-                                    background: '#FFD93D',
-                                    color: '#333',
-                                    padding: '1rem 2.5rem',
+                                    background: heroStyle.ctaBg,
+                                    color: heroStyle.ctaTextColor,
+                                    padding: '1rem 2.75rem',
                                     borderRadius: '9999px',
                                     textDecoration: 'none',
-                                    fontWeight: 700,
+                                    fontWeight: 800,
                                     fontSize: '1.125rem',
-                                    boxShadow: '0 8px 20px rgba(255, 217, 61, 0.3)'
+                                    letterSpacing: '0.01em',
+                                    boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+                                    border: '2px solid rgba(255,255,255,0.2)'
                                 }}>
-                                    了解更多
+                                    {heroStyle.ctaLabel || '立即預約體驗'}
                                 </Link>
                             )}
                         </div>

@@ -10,17 +10,26 @@ export async function POST(request: Request) {
         }
 
         const formData = await request.formData()
+
+        const enabled = formData.get('enabled') === 'on'
+        const ctaEnabled = formData.get('ctaEnabled') === 'on'
+        const rawHref = ((formData.get('ctaHref') as string) || '').trim()
+
         const payload = {
-            enabled: formData.get('enabled') === 'on',
+            enabled,
             imageUrl: (formData.get('imageUrl') as string) || '',
-            ctaEnabled: formData.get('ctaEnabled') === 'on',
+            ctaEnabled,
             ctaLabel: (formData.get('ctaLabel') as string) || '立即報名',
-            ctaHref: (formData.get('ctaHref') as string) || '/register',
+            ctaHref: ctaEnabled ? (rawHref || '/register') : null,
             storageKey: (formData.get('storageKey') as string) || 'home-announcement',
         }
 
         if (!payload.imageUrl) {
             return NextResponse.json({ error: '請上傳海報圖片' }, { status: 400 })
+        }
+
+        if (payload.ctaEnabled && !rawHref) {
+            return NextResponse.json({ error: '請填寫報名按鈕的網址' }, { status: 400 })
         }
 
         const { error } = await supabase

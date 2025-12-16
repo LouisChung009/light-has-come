@@ -1,49 +1,28 @@
-import { createClient } from '@/utils/supabase/server'
+import { getDb, Album, Photo } from '@/utils/db'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import Footer from '../../components/Footer'
-
-type Photo = {
-    id: string
-    src: string
-    alt: string
-    width: number
-    height: number
-}
-
-type Album = {
-    id: string
-    title: string
-    date: string
-    description: string
-    cover_color: string
-}
 
 export const dynamic = 'force-dynamic'
 
 export default async function AlbumDetail({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
-    const supabase = await createClient()
+    const sql = getDb()
 
-    const { data: albumData } = await supabase
-        .from('albums')
-        .select('id, title, date, description, cover_color')
-        .eq('id', id)
-        .single()
+    const albums = await sql`
+        SELECT id, title, date, description, cover_color 
+        FROM albums WHERE id = ${id}
+    ` as Album[]
 
-    const album = albumData as Album | null
+    const album = albums[0] || null
 
     if (!album) {
         notFound()
     }
 
-    const { data: photosData } = await supabase
-        .from('photos')
-        .select('*')
-        .eq('album_id', id)
-        .order('created_at', { ascending: false })
-
-    const photos = (photosData || []) as Photo[]
+    const photos = await sql`
+        SELECT * FROM photos WHERE album_id = ${id} ORDER BY created_at DESC
+    ` as Photo[]
 
     return (
         <div style={{ minHeight: '100vh', background: '#F5F5F5' }}>

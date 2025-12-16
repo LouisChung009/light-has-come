@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/utils/supabase/client'
 
 export default function BannerUploadForm() {
     const [isUploading, setIsUploading] = useState(false)
@@ -12,22 +13,66 @@ export default function BannerUploadForm() {
         e.preventDefault()
         const formEl = formRef.current
         if (!formEl) return
-        setIsUploading(true)
+
         const formData = new FormData(formEl)
+        const file = formData.get('file') as File | null
+        if (!file) {
+            alert('請選擇檔案')
+            return
+        }
+
+        setIsUploading(true)
+
+        const supabase = createClient()
+        const title = (formData.get('title') as string) || null
+        const subtitle = (formData.get('subtitle') as string) || null
+        const linkUrl = (formData.get('linkUrl') as string) || null
+        const displayOrder = parseInt(formData.get('displayOrder') as string) || 0
+
+        const mediaType = file.type?.startsWith('video/') ? 'video' : 'image'
+        const fileExt = file.name.split('.').pop() || 'bin'
+        const fileName = `banners/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+
         try {
-            const res = await fetch('/api/banner', {
-                method: 'POST',
-                body: formData,
-            })
-            const data = await res.json()
-            if (!res.ok || data.error) {
-                throw new Error(data.error || '上傳失敗')
+            // 直接上傳到 Supabase Storage，避免經過 Vercel 函式的尺寸限制
+            const { error: uploadError } = await supabase.storage
+                .from('gallery')
+                .upload(fileName, file, {
+                    contentType: file.type || undefined,
+                    upsert: true,
+                })
+
+            if (uploadError) {
+                throw new Error(`檔案上傳失敗：${uploadError.message}`)
             }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('gallery')
+                .getPublicUrl(fileName)
+
+            const { error: dbError } = await supabase
+                .from('banner_slides')
+                .insert({
+                    title,
+                    subtitle,
+                    media_url: publicUrl,
+                    media_type: mediaType,
+                    link_url: linkUrl || null,
+                    display_order: displayOrder,
+                    is_active: true
+                })
+
+            if (dbError) {
+                throw new Error(`寫入資料庫失敗：${dbError.message}`)
+            }
+
             formEl.reset()
             router.refresh()
         } catch (err) {
             console.error(err)
-            alert(err instanceof Error ? err.message : '上傳失敗，請稍後再試')
+            const message = err instanceof Error ? err.message : '上傳失敗，請稍後再試'
+            // Vercel 若回傳純文字（例如 Request Entity Too Large），避免 JSON parse 錯誤
+            alert(message)
         } finally {
             setIsUploading(false)
         }

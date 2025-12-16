@@ -1,17 +1,16 @@
 import Link from 'next/link'
-import { createClient } from '@/utils/supabase/server'
+import { getDb, SiteContent } from '@/utils/db'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function Footer() {
-  const supabase = await createClient()
+  const sql = getDb()
 
-  // Fetch contact content from Supabase
-  const { data: content } = await supabase
-    .from('site_content')
-    .select('*')
-    .eq('category', 'contact')
+  // Fetch contact content from Neon
+  const content = await sql`
+    SELECT * FROM site_content WHERE category = 'contact'
+  ` as SiteContent[]
 
   // Helper function to get content by ID
   const getContent = (id: string) => {

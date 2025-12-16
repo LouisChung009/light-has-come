@@ -1,8 +1,29 @@
 import { NextResponse } from 'next/server'
+import { getDb } from '@/utils/db'
+import { uploadToExternalStorage } from '@/utils/storage/external'
 import { createClient } from '@/utils/supabase/server'
 
+// GET: Fetch active banners (public)
+export async function GET() {
+    try {
+        const sql = getDb()
+        const banners = await sql`
+            SELECT id, title, subtitle, media_url, media_type, link_url 
+            FROM banner_slides 
+            WHERE is_active = true 
+            ORDER BY display_order ASC
+        `
+        return NextResponse.json(banners)
+    } catch (error) {
+        console.error('Failed to fetch banners:', error)
+        return NextResponse.json({ error: 'Failed to fetch banners' }, { status: 500 })
+    }
+}
+
+// POST: Upload new banner (requires auth)
 export async function POST(request: Request) {
     try {
+        // Check auth with Supabase (for now, we still use Supabase Auth)
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
@@ -23,38 +44,17 @@ export async function POST(request: Request) {
         const mediaType = file.type.startsWith('video/') ? 'video' : 'image'
         const fileExt = file.name.split('.').pop()
         const fileName = `banners/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-        const buffer = Buffer.from(await file.arrayBuffer())
+        const buffer = new Uint8Array(await file.arrayBuffer())
 
-        const { error: uploadError } = await supabase.storage
-            .from('gallery')
-            .upload(fileName, buffer, {
-                contentType: file.type || undefined,
-                upsert: true,
-            })
+        // Upload to R2
+        const publicUrl = await uploadToExternalStorage(fileName, buffer, file.type)
 
-        if (uploadError) {
-            return NextResponse.json({ error: uploadError.message }, { status: 500 })
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-            .from('gallery')
-            .getPublicUrl(fileName)
-
-        const { error: dbError } = await supabase
-            .from('banner_slides')
-            .insert({
-                title,
-                subtitle,
-                media_url: publicUrl,
-                media_type: mediaType,
-                link_url: linkUrl || null,
-                display_order: displayOrder,
-                is_active: true
-            })
-
-        if (dbError) {
-            return NextResponse.json({ error: dbError.message }, { status: 500 })
-        }
+        // Save to Neon
+        const sql = getDb()
+        await sql`
+            INSERT INTO banner_slides (title, subtitle, media_url, media_type, link_url, display_order, is_active)
+            VALUES (${title}, ${subtitle}, ${publicUrl}, ${mediaType}, ${linkUrl || null}, ${displayOrder}, true)
+        `
 
         return NextResponse.json({ ok: true })
     } catch (error) {
@@ -62,3 +62,4 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: '伺服器錯誤，請稍後再試' }, { status: 500 })
     }
 }
+

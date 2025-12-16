@@ -1,7 +1,8 @@
 'use client'
 
 import { deleteBannerSlide, toggleBannerSlide } from '../content/actions'
-import { useState } from 'react'
+import { updateBannerSlide } from './actions'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Banner {
@@ -17,6 +18,14 @@ interface Banner {
 
 export default function BannerSlideCard({ banner }: { banner: Banner }) {
     const [isProcessing, setIsProcessing] = useState(false)
+    const [isEditing, setIsEditing] = useState(false)
+    const [title, setTitle] = useState(banner.title || '')
+    const [subtitle, setSubtitle] = useState(banner.subtitle || '')
+    const [linkUrl, setLinkUrl] = useState(banner.link_url || '')
+    const [displayOrder, setDisplayOrder] = useState(banner.display_order || 0)
+    const [file, setFile] = useState<File | null>(null)
+    const [message, setMessage] = useState('')
+    const [isSaving, startTransition] = useTransition()
     const router = useRouter()
 
     const handleDelete = async () => {
@@ -31,6 +40,31 @@ export default function BannerSlideCard({ banner }: { banner: Banner }) {
         setIsProcessing(true)
         await toggleBannerSlide(banner.id, !banner.is_active)
         router.refresh()
+    }
+
+    const handleUpdate = (e: React.FormEvent) => {
+        e.preventDefault()
+        setMessage('')
+        startTransition(async () => {
+            const formData = new FormData()
+            formData.append('id', banner.id)
+            formData.append('title', title)
+            formData.append('subtitle', subtitle)
+            formData.append('linkUrl', linkUrl)
+            formData.append('displayOrder', String(displayOrder))
+            if (file) {
+                formData.append('file', file)
+            }
+            const res = await updateBannerSlide(formData)
+            if (res?.error) {
+                setMessage(res.error)
+                return
+            }
+            setMessage('已更新')
+            setIsEditing(false)
+            setFile(null)
+            router.refresh()
+        })
     }
 
     return (
@@ -88,7 +122,7 @@ export default function BannerSlideCard({ banner }: { banner: Banner }) {
                     排序: {banner.display_order} | 類型: {banner.media_type === 'video' ? '影片' : '圖片'}
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
                     <button
                         onClick={handleToggle}
                         disabled={isProcessing}
@@ -123,7 +157,84 @@ export default function BannerSlideCard({ banner }: { banner: Banner }) {
                     >
                         刪除
                     </button>
+                    <button
+                        onClick={() => setIsEditing((prev) => !prev)}
+                        disabled={isProcessing}
+                        style={{
+                            flex: 1,
+                            background: '#6366f1',
+                            color: 'white',
+                            border: 'none',
+                            padding: '0.5rem',
+                            borderRadius: '0.375rem',
+                            fontSize: '0.875rem',
+                            cursor: isProcessing ? 'not-allowed' : 'pointer',
+                            fontWeight: 500
+                        }}
+                    >
+                        {isEditing ? '關閉編輯' : '編輯'}
+                    </button>
                 </div>
+
+                {isEditing && (
+                    <form onSubmit={handleUpdate} style={{ display: 'grid', gap: '0.5rem' }}>
+                        <input
+                            type="text"
+                            placeholder="標題"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            style={{ width: '100%', padding: '0.6rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}
+                        />
+                        <input
+                            type="text"
+                            placeholder="副標"
+                            value={subtitle}
+                            onChange={(e) => setSubtitle(e.target.value)}
+                            style={{ width: '100%', padding: '0.6rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}
+                        />
+                        <input
+                            type="url"
+                            placeholder="連結 (可留空)"
+                            value={linkUrl}
+                            onChange={(e) => setLinkUrl(e.target.value)}
+                            style={{ width: '100%', padding: '0.6rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}
+                        />
+                        <label style={{ fontSize: '0.85rem', color: '#555' }}>
+                            排序
+                            <input
+                                type="number"
+                                value={displayOrder}
+                                onChange={(e) => setDisplayOrder(parseInt(e.target.value, 10) || 0)}
+                                style={{ width: '100%', padding: '0.6rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb', marginTop: '0.25rem' }}
+                            />
+                        </label>
+                        <label style={{ fontSize: '0.85rem', color: '#555' }}>
+                            更換圖片/影片 (選填)
+                            <input
+                                type="file"
+                                accept="image/*,video/*"
+                                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                                style={{ width: '100%', marginTop: '0.25rem' }}
+                            />
+                        </label>
+                        <button
+                            type="submit"
+                            disabled={isSaving}
+                            style={{
+                                background: isSaving ? '#ccc' : '#4A90C8',
+                                color: 'white',
+                                padding: '0.65rem',
+                                borderRadius: '0.5rem',
+                                border: 'none',
+                                fontWeight: 700,
+                                cursor: isSaving ? 'not-allowed' : 'pointer'
+                            }}
+                        >
+                            {isSaving ? '儲存中…' : '儲存修改'}
+                        </button>
+                        {message && <div style={{ color: message === '已更新' ? '#16a34a' : '#ef4444', fontWeight: 600 }}>{message}</div>}
+                    </form>
+                )}
             </div>
         </div>
     )

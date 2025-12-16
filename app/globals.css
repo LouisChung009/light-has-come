@@ -188,13 +188,13 @@ p {
 /* 響應式文字大小 */
 @media (max-width: 639px) {
   html {
-    font-size: 14px;
+    font-size: 16px;
   }
 }
 
 @media (min-width: 1024px) {
   html {
-    font-size: 16px;
+    font-size: 18px;
   }
 }
 

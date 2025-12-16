@@ -8,14 +8,28 @@ export default function BulkImportPage() {
     const [result, setResult] = useState<BulkImportResult | null>(null)
     const [isPending, startTransition] = useTransition()
     const [selectedFileName, setSelectedFileName] = useState('')
+    const [errorMsg, setErrorMsg] = useState('')
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         const formData = new FormData(event.currentTarget)
 
+        setErrorMsg('')
         startTransition(async () => {
-            const response = await bulkImportAlbums(formData)
-            setResult(response)
+            try {
+                const response = await bulkImportAlbums(formData)
+                if (!response) {
+                    setErrorMsg('匯入失敗，請稍後再試')
+                    return
+                }
+                setResult(response)
+                if (!response.success && response.errors.length === 0) {
+                    setErrorMsg('匯入失敗，請檢查檔案是否正確或檔案過大')
+                }
+            } catch (err) {
+                console.error('bulk import error', err)
+                setErrorMsg('匯入時發生錯誤，請稍後再試')
+            }
         })
     }
 

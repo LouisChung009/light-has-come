@@ -1,15 +1,15 @@
 import Link from 'next/link'
-import { createClient } from '@/utils/supabase/server'
+import { getDb, SiteContent } from '@/utils/db'
 import Footer from '../components/Footer'
 
 export default async function About() {
-    const supabase = await createClient()
+    const sql = getDb()
 
-    // Fetch content from Supabase
-    const { data: content } = await supabase
-        .from('site_content')
-        .select('*')
-        .in('category', ['about', 'contact'])
+    // Fetch content from Neon
+    const content = await sql`
+        SELECT * FROM site_content 
+        WHERE category IN ('about', 'contact')
+    ` as SiteContent[]
 
     // Helper function to get content by ID
     const getContent = (id: string) => {
