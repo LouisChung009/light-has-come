@@ -52,3 +52,22 @@ export type Category = {
     value: string
     sort_order: number
 }
+
+export type SiteContent = {
+    id: string
+    category: string
+    section: string
+    label: string
+    content: string
+    content_type: string
+}
+
+export type BannerSlide = {
+    id: string
+    title: string
+    subtitle: string
+    media_url: string
+    media_type: string
+    link_url: string | null
+}
+

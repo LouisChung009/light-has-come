@@ -1,25 +1,6 @@
 import Link from 'next/link'
 import Footer from '../components/Footer'
-import { createClient } from '@/utils/supabase/server'
-
-type Album = {
-    id: string
-    title: string
-    date: string
-    description: string
-    category: string
-    cover_color: string
-    cover_photo_url?: string
-    photos?: { count: number }[]
-    is_pinned?: boolean
-}
-
-type Category = {
-    id: string
-    label: string
-    value: string
-    sort_order: number
-}
+import { getDb, Album, Category } from '@/utils/db'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,22 +8,20 @@ export default async function Gallery({ searchParams }: { searchParams: Promise<
     const resolvedParams = await searchParams
     const filter = resolvedParams?.filter || 'all'
 
-    const supabase = await createClient()
+    const sql = getDb()
 
-    const [{ data: categories }, { data: albums }] = await Promise.all([
-        supabase
-            .from('album_categories')
-            .select('*')
-            .order('sort_order', { ascending: true }),
-        supabase
-            .from('albums')
-            .select(`*, photos:photos(count)`)
-            .order('is_pinned', { ascending: false })
-            .order('date', { ascending: false }),
+    const [categories, albums] = await Promise.all([
+        sql`SELECT * FROM album_categories ORDER BY sort_order ASC`,
+        sql`SELECT a.*, (SELECT COUNT(*) FROM photos p WHERE p.album_id = a.id) as photo_count 
+            FROM albums a 
+            ORDER BY a.is_pinned DESC, a.date DESC`
     ])
 
     const safeCategories = (categories || []) as Category[]
-    const safeAlbums = (albums || []) as Album[]
+    const safeAlbums = (albums || []).map((a: Record<string, unknown>) => ({
+        ...a,
+        photos: [{ count: Number(a.photo_count) || 0 }]
+    })) as (Album & { photos?: { count: number }[] })[]
 
     const filteredAlbums = filter === 'all'
         ? safeAlbums
@@ -52,6 +31,7 @@ export default async function Gallery({ searchParams }: { searchParams: Promise<
         const cat = safeCategories.find(c => c.value === value)
         return cat ? cat.label : value
     }
+
 
     const filterLinkStyle = (isActive: boolean) => ({
         padding: '0.5rem 1.5rem',
