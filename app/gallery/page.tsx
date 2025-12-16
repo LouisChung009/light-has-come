@@ -8,21 +8,30 @@ export default async function Gallery({ searchParams }: { searchParams: Promise<
     const resolvedParams = await searchParams
     const filter = resolvedParams?.filter || 'all'
 
-    const sql = getDb()
+    let safeCategories: Category[] = []
+    let safeAlbums: (Album & { photos?: { count: number }[] })[] = []
+    let errorMessage: string | null = null
 
-    const [categories, albums] = await Promise.all([
-        sql`SELECT * FROM album_categories ORDER BY sort_order ASC`,
-        sql`SELECT a.*, COALESCE(a.is_pinned, false) as is_pinned, 
-            (SELECT COUNT(*) FROM photos p WHERE p.album_id = a.id) as photo_count 
-            FROM albums a 
-            ORDER BY COALESCE(a.is_pinned, false) DESC, a.date DESC`
-    ])
+    try {
+        const sql = getDb()
 
-    const safeCategories = (categories || []) as Category[]
-    const safeAlbums = (albums || []).map((a: Record<string, unknown>) => ({
-        ...a,
-        photos: [{ count: Number(a.photo_count) || 0 }]
-    })) as (Album & { photos?: { count: number }[] })[]
+        const [categories, albums] = await Promise.all([
+            sql`SELECT * FROM album_categories ORDER BY sort_order ASC`,
+            sql`SELECT a.*, COALESCE(a.is_pinned, false) as is_pinned, 
+                (SELECT COUNT(*) FROM photos p WHERE p.album_id = a.id) as photo_count 
+                FROM albums a 
+                ORDER BY COALESCE(a.is_pinned, false) DESC, a.date DESC`
+        ])
+
+        safeCategories = (categories || []) as Category[]
+        safeAlbums = (albums || []).map((a: Record<string, unknown>) => ({
+            ...a,
+            photos: [{ count: Number(a.photo_count) || 0 }]
+        })) as (Album & { photos?: { count: number }[] })[]
+    } catch (error) {
+        console.error('Gallery database error:', error)
+        errorMessage = error instanceof Error ? error.message : 'Unknown database error'
+    }
 
     const filteredAlbums = filter === 'all'
         ? safeAlbums
@@ -86,7 +95,11 @@ export default async function Gallery({ searchParams }: { searchParams: Promise<
             {/* Album Grid */}
             <section style={{ padding: '4rem 1.5rem' }}>
                 <div className="container">
-                    {filteredAlbums.length === 0 ? (
+                    {errorMessage ? (
+                        <div style={{ textAlign: 'center', padding: '2rem', color: '#c00', background: '#fee', borderRadius: '1rem' }}>
+                            資料庫錯誤：{errorMessage}
+                        </div>
+                    ) : filteredAlbums.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>目前沒有相關相簿</div>
                     ) : (
                         <div style={{
