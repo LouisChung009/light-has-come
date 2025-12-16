@@ -1,30 +1,17 @@
 
-import { SignJWT, jwtVerify } from 'jose'
+/**
+ * Server-side authentication utilities.
+ * This file uses Node.js modules (bcryptjs, database) and should ONLY run in Server Actions.
+ * For Edge Runtime (middleware), use auth-edge.ts instead.
+ */
+
 import { cookies } from 'next/headers'
 import { getDb } from './db'
 import bcrypt from 'bcryptjs'
+import { encrypt, decrypt } from './auth-edge'
 
-const SECRET_KEY = process.env.AUTH_SECRET || 'default-secret-key-change-me'
-const key = new TextEncoder().encode(SECRET_KEY)
-
-export async function encrypt(payload: any) {
-    return await new SignJWT(payload)
-        .setProtectedHeader({ alg: 'HS256' })
-        .setIssuedAt()
-        .setExpirationTime('24h')
-        .sign(key)
-}
-
-export async function decrypt(input: string): Promise<any> {
-    try {
-        const { payload } = await jwtVerify(input, key, {
-            algorithms: ['HS256'],
-        })
-        return payload
-    } catch {
-        return null
-    }
-}
+// Re-export for convenience
+export { encrypt, decrypt }
 
 export async function login(email: string, password: string): Promise<{ success: boolean; error?: string }> {
     try {
