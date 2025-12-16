@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
+import { getDb, Album } from '@/utils/db'
 import Link from 'next/link'
 import DeleteAlbumButton from './DeleteAlbumButton'
 import SortControl from './SortControl'
@@ -6,34 +6,28 @@ import PinButton from './PinButton'
 
 export default async function AdminGallery({ searchParams }: { searchParams: Promise<{ sort?: string }> }) {
     const { sort = 'date_desc' } = await searchParams
-    const supabase = await createClient()
+    const sql = getDb()
 
-    let query = supabase
-        .from('albums')
-        .select('*')
-
-    // Apply sorting
-    // Primary sort: is_pinned (descending) so true comes first
-    query = query.order('is_pinned', { ascending: false })
-
-    // Secondary sort based on user selection
+    // Build ORDER BY clause based on sort parameter
+    let orderBy = 'is_pinned DESC, date DESC'
     switch (sort) {
         case 'date_asc':
-            query = query.order('date', { ascending: true })
+            orderBy = 'is_pinned DESC, date ASC'
             break
         case 'title_asc':
-            query = query.order('title', { ascending: true })
+            orderBy = 'is_pinned DESC, title ASC'
             break
         case 'title_desc':
-            query = query.order('title', { ascending: false })
+            orderBy = 'is_pinned DESC, title DESC'
             break
         case 'date_desc':
         default:
-            query = query.order('date', { ascending: false })
+            orderBy = 'is_pinned DESC, date DESC'
             break
     }
 
-    const { data: albums } = await query
+    const albums = await sql`SELECT * FROM albums ORDER BY ${sql.unsafe(orderBy)}` as Album[]
+
 
     return (
         <div style={{ padding: '2rem' }}>
@@ -94,20 +88,20 @@ export default async function AdminGallery({ searchParams }: { searchParams: Pro
                         <div style={{
                             height: '150px',
                             background: album.cover_color,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '3rem',
-                        position: 'relative'
-                    }}>
-                        {album.cover_photo_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                                src={album.cover_photo_url}
-                                alt={album.title}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
-                        ) : (
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '3rem',
+                            position: 'relative'
+                        }}>
+                            {album.cover_photo_url ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                    src={album.cover_photo_url}
+                                    alt={album.title}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                            ) : (
                                 <span>📷</span>
                             )}
                         </div>

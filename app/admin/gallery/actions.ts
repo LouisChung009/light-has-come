@@ -1,9 +1,10 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { getDb } from '@/utils/db'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import JSZip from 'jszip'
+import { deleteFromExternalStorage, extractExternalKeyFromUrl, isExternalStorageEnabled, uploadToExternalStorage } from '@/utils/storage/external'
 
 type AlbumMeta = {
     id?: string
@@ -61,7 +62,7 @@ const CATEGORY_ALIASES: Record<string, AlbumMeta['category']> = {
 const ALLOWED_IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif', 'heic', 'heif'])
 
 export async function createAlbum(formData: FormData) {
-    const supabase = await createClient()
+    const sql = getDb()
 
     const title = formData.get('title') as string
     const date = formData.get('date') as string
@@ -71,19 +72,11 @@ export async function createAlbum(formData: FormData) {
     // Generate a simple ID from date and random string to avoid collision
     const id = `${date}-${Math.random().toString(36).substring(2, 7)}`
 
-    const { error } = await supabase
-        .from('albums')
-        .insert({
-            id,
-            title,
-            date,
-            category,
-            description,
-            cover_color: 'linear-gradient(135deg, #FFD93D, #FFAAA5)' // Default color
-        })
-
-    if (error) {
-        throw new Error(error.message)
+    try {
+        await sql`INSERT INTO albums (id, title, date, category, description, cover_color)
+                  VALUES (${id}, ${title}, ${date}, ${category}, ${description}, 'linear-gradient(135deg, #FFD93D, #FFAAA5)')`
+    } catch (error) {
+        throw new Error(error instanceof Error ? error.message : 'Failed to create album')
     }
 
     revalidatePath('/admin/gallery')
@@ -91,15 +84,12 @@ export async function createAlbum(formData: FormData) {
 }
 
 export async function deleteAlbum(id: string): Promise<void> {
-    const supabase = await createClient()
+    const sql = getDb()
 
-    const { error } = await supabase
-        .from('albums')
-        .delete()
-        .eq('id', id)
-
-    if (error) {
-        throw new Error(error.message)
+    try {
+        await sql`DELETE FROM albums WHERE id = ${id}`
+    } catch (error) {
+        throw new Error(error instanceof Error ? error.message : 'Failed to delete album')
     }
 
     revalidatePath('/admin/gallery')
@@ -108,25 +98,17 @@ export async function deleteAlbum(id: string): Promise<void> {
 }
 
 export async function updateAlbum(id: string, formData: FormData) {
-    const supabase = await createClient()
+    const sql = getDb()
 
     const title = formData.get('title') as string
     const date = formData.get('date') as string
     const category = formData.get('category') as string
     const description = formData.get('description') as string
 
-    const { error } = await supabase
-        .from('albums')
-        .update({
-            title,
-            date,
-            category,
-            description
-        })
-        .eq('id', id)
-
-    if (error) {
-        throw new Error(error.message)
+    try {
+        await sql`UPDATE albums SET title = ${title}, date = ${date}, category = ${category}, description = ${description} WHERE id = ${id}`
+    } catch (error) {
+        throw new Error(error instanceof Error ? error.message : 'Failed to update album')
     }
 
     revalidatePath(`/admin/gallery/${id}`)
@@ -135,24 +117,22 @@ export async function updateAlbum(id: string, formData: FormData) {
 }
 
 export async function togglePin(id: string, isPinned: boolean) {
-    const supabase = await createClient()
+    const sql = getDb()
 
-    const { error } = await supabase
-        .from('albums')
-        .update({ is_pinned: !isPinned })
-        .eq('id', id)
-
-    if (error) {
-        throw new Error(error.message)
+    try {
+        await sql`UPDATE albums SET is_pinned = ${!isPinned} WHERE id = ${id}`
+    } catch (error) {
+        throw new Error(error instanceof Error ? error.message : 'Failed to toggle pin')
     }
 
     revalidatePath('/admin/gallery')
+
     revalidatePath('/gallery')
     revalidatePath(`/gallery/${id}`)
 }
 
 export async function uploadPhoto(formData: FormData) {
-    const supabase = await createClient()
+    const sql = getDb()
 
     const albumId = formData.get('albumId') as string
     const file = formData.get('file') as File
@@ -161,82 +141,62 @@ export async function uploadPhoto(formData: FormData) {
         return { error: 'No file uploaded' }
     }
 
-    // 1. Upload file to Storage
-    const fileExt = file.name.split('.').pop()
+    // 1. Upload file to Storage (external R2)
+    const fileExt = (file.name.split('.').pop() || 'jpg').toLowerCase()
     const fileName = `${albumId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
 
-    const { error: uploadError } = await supabase.storage
-        .from('gallery')
-        .upload(fileName, file)
+    let publicUrl: string
 
-    if (uploadError) {
-        return { error: uploadError.message }
+    if (isExternalStorageEnabled()) {
+        const buffer = Buffer.from(await file.arrayBuffer())
+        publicUrl = await uploadToExternalStorage(
+            fileName,
+            buffer,
+            file.type || guessContentType(fileExt)
+        )
+    } else {
+        return { error: 'External storage not configured' }
     }
 
-    // 2. Get Public URL
-    const { data: { publicUrl } } = supabase.storage
-        .from('gallery')
-        .getPublicUrl(fileName)
-
-    // 3. Insert into photos table
-    const { error: dbError } = await supabase
-        .from('photos')
-        .insert({
-            album_id: albumId,
-            src: publicUrl,
-            alt: file.name,
-            width: 800, // Mock width/height for now, ideally we get this from the image
-            height: 600
-        })
-
-    if (dbError) {
-        return { error: dbError.message }
+    // 2. Insert into photos table
+    try {
+        await sql`INSERT INTO photos (album_id, src, alt, width, height)
+                  VALUES (${albumId}, ${publicUrl}, ${file.name}, 800, 600)`
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : 'Failed to save photo' }
     }
 
     revalidatePath(`/admin/gallery/${albumId}`)
 }
 
 export async function deletePhoto(id: string, src: string) {
-    const supabase = await createClient()
+    const sql = getDb()
 
-    // 1. Delete from Storage
-    // Extract path from URL: .../gallery/albumId/filename
-    const path = src.split('/gallery/')[1]
-    if (path) {
-        await supabase.storage
-            .from('gallery')
-            .remove([path])
+    // 1. Delete from External Storage (R2)
+    const externalKey = extractExternalKeyFromUrl(src)
+    if (externalKey) {
+        try {
+            await deleteFromExternalStorage(externalKey)
+        } catch (err) {
+            console.error('External storage delete failed', err)
+        }
     }
 
     // 2. Delete from Database
-    const { error } = await supabase
-        .from('photos')
-        .delete()
-        .eq('id', id)
-
-    if (error) {
-        return { error: error.message }
+    try {
+        await sql`DELETE FROM photos WHERE id = ${id}`
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : 'Failed to delete photo' }
     }
-
-    // We need to revalidate the page where this photo was
-    // Since we don't have the albumId here easily without querying, 
-    // we might rely on the client to refresh or pass albumId.
-    // But usually revalidatePath with layout or page path works.
-    // Let's try to revalidate the specific album page if possible, 
-    // but generic revalidate might be safer if we don't know the ID.
-    // Actually, the client calls this, so the client can refresh.
 }
 
 export async function setAlbumCover(albumId: string, photoUrl: string) {
-    const supabase = await createClient()
+    const sql = getDb()
 
-    const { error } = await supabase
-        .from('albums')
-        .update({ cover_photo_url: photoUrl })
-        .eq('id', albumId)
-
-    if (error) {
-        return { error: error.message }
+    try {
+        await sql`UPDATE albums SET cover_photo_url = ${photoUrl} WHERE id = ${albumId}`
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : 'Failed to set cover' }
     }
 
     revalidatePath(`/admin/gallery/${albumId}`)
@@ -258,7 +218,7 @@ export async function bulkImportAlbums(formData: FormData): Promise<BulkImportRe
         }
     }
 
-    const supabase = await createClient()
+    const sql = getDb()
     const errors: string[] = []
     const details: string[] = []
 
@@ -302,30 +262,20 @@ export async function bulkImportAlbums(formData: FormData): Promise<BulkImportRe
         const albumId = meta.id || createAlbumId(meta)
 
         // 先確認相簿是否已存在
-        const { data: existingAlbum } = await supabase
-            .from('albums')
-            .select('id, cover_photo_url')
-            .eq('id', albumId)
-            .maybeSingle()
+        const existingAlbums = await sql`SELECT id, cover_photo_url FROM albums WHERE id = ${albumId} LIMIT 1`
+        const existingAlbum = existingAlbums[0] as { id: string, cover_photo_url: string | null } | undefined
 
         if (!existingAlbum) {
-            const { error: insertError } = await supabase
-                .from('albums')
-                .insert({
-                    id: albumId,
-                    title: meta.title,
-                    date: meta.date,
-                    category: meta.category,
-                    description: meta.description,
-                    cover_color: meta.cover_color || pickCoverColor(albumId)
-                })
-
-            if (insertError) {
-                errors.push(`相簿 ${meta.title} 建立失敗: ${insertError.message}`)
+            try {
+                const coverColor = meta.cover_color || pickCoverColor(albumId)
+                await sql`INSERT INTO albums (id, title, date, category, description, cover_color)
+                          VALUES (${albumId}, ${meta.title}, ${meta.date}, ${meta.category}, ${meta.description || null}, ${coverColor})`
+                createdAlbums++
+                details.push(`✅ 已建立相簿「${meta.title}」`)
+            } catch (insertError) {
+                errors.push(`相簿 ${meta.title} 建立失敗: ${insertError instanceof Error ? insertError.message : 'Unknown error'}`)
                 continue
             }
-            createdAlbums++
-            details.push(`✅ 已建立相簿「${meta.title}」`)
         } else {
             details.push(`ℹ️ 相簿「${meta.title}」已存在，追加照片中`)
         }
@@ -344,33 +294,29 @@ export async function bulkImportAlbums(formData: FormData): Promise<BulkImportRe
             const fileBuffer = await file.zipFile.async('nodebuffer')
             const storagePath = `${albumId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${sanitizeFileName(file.fileName)}`
 
-            const { error: uploadError } = await supabase.storage
-                .from('gallery')
-                .upload(storagePath, fileBuffer, {
-                    contentType: guessContentType(extension)
-                })
+            let publicUrl: string
 
-            if (uploadError) {
-                errors.push(`照片 ${file.fileName} 上傳失敗: ${uploadError.message}`)
+            if (isExternalStorageEnabled()) {
+                try {
+                    publicUrl = await uploadToExternalStorage(
+                        storagePath,
+                        fileBuffer,
+                        guessContentType(extension)
+                    )
+                } catch (err) {
+                    errors.push(`照片 ${file.fileName} 上傳失敗: ${err instanceof Error ? err.message : 'external upload error'}`)
+                    continue
+                }
+            } else {
+                errors.push(`照片 ${file.fileName} 上傳失敗: External storage not configured`)
                 continue
             }
 
-            const { data: { publicUrl } } = supabase.storage
-                .from('gallery')
-                .getPublicUrl(storagePath)
-
-            const { error: dbError } = await supabase
-                .from('photos')
-                .insert({
-                    album_id: albumId,
-                    src: publicUrl,
-                    alt: file.fileName,
-                    width: 800,
-                    height: 600
-                })
-
-            if (dbError) {
-                errors.push(`照片 ${file.fileName} 寫入資料庫失敗: ${dbError.message}`)
+            try {
+                await sql`INSERT INTO photos (album_id, src, alt, width, height)
+                          VALUES (${albumId}, ${publicUrl}, ${file.fileName}, 800, 600)`
+            } catch (dbError) {
+                errors.push(`照片 ${file.fileName} 寫入資料庫失敗: ${dbError instanceof Error ? dbError.message : 'Unknown error'}`)
                 continue
             }
 
@@ -381,10 +327,7 @@ export async function bulkImportAlbums(formData: FormData): Promise<BulkImportRe
         }
 
         if ((!existingAlbum || !existingAlbum.cover_photo_url) && firstPhotoUrl) {
-            await supabase
-                .from('albums')
-                .update({ cover_photo_url: firstPhotoUrl })
-                .eq('id', albumId)
+            await sql`UPDATE albums SET cover_photo_url = ${firstPhotoUrl} WHERE id = ${albumId}`
         }
     }
 

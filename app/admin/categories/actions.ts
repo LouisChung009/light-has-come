@@ -1,32 +1,23 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { getDb, Category } from '@/utils/db'
 import { revalidatePath } from 'next/cache'
 
-export type Category = {
-    id: string
-    label: string
-    value: string
-    sort_order: number
-}
+export type { Category }
 
-export async function getCategories() {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-        .from('album_categories')
-        .select('*')
-        .order('sort_order', { ascending: true })
-
-    if (error) {
+export async function getCategories(): Promise<Category[]> {
+    const sql = getDb()
+    try {
+        const data = await sql`SELECT * FROM album_categories ORDER BY sort_order ASC`
+        return data as Category[]
+    } catch (error) {
         console.error('Error fetching categories:', error)
         return []
     }
-
-    return data as Category[]
 }
 
 export async function createCategory(formData: FormData) {
-    const supabase = await createClient()
+    const sql = getDb()
     const label = formData.get('label') as string
     const value = formData.get('value') as string
     const sort_order = parseInt(formData.get('sort_order') as string || '0')
@@ -35,12 +26,10 @@ export async function createCategory(formData: FormData) {
         throw new Error('Label and Value are required')
     }
 
-    const { error } = await supabase
-        .from('album_categories')
-        .insert({ label, value, sort_order })
-
-    if (error) {
-        throw new Error(error.message)
+    try {
+        await sql`INSERT INTO album_categories (label, value, sort_order) VALUES (${label}, ${value}, ${sort_order})`
+    } catch (error) {
+        throw new Error(error instanceof Error ? error.message : 'Failed to create category')
     }
 
     revalidatePath('/admin/categories')
@@ -49,18 +38,15 @@ export async function createCategory(formData: FormData) {
 }
 
 export async function updateCategory(id: string, formData: FormData) {
-    const supabase = await createClient()
+    const sql = getDb()
     const label = formData.get('label') as string
     const value = formData.get('value') as string
     const sort_order = parseInt(formData.get('sort_order') as string || '0')
 
-    const { error } = await supabase
-        .from('album_categories')
-        .update({ label, value, sort_order })
-        .eq('id', id)
-
-    if (error) {
-        throw new Error(error.message)
+    try {
+        await sql`UPDATE album_categories SET label = ${label}, value = ${value}, sort_order = ${sort_order} WHERE id = ${id}`
+    } catch (error) {
+        throw new Error(error instanceof Error ? error.message : 'Failed to update category')
     }
 
     revalidatePath('/admin/categories')
@@ -69,17 +55,15 @@ export async function updateCategory(id: string, formData: FormData) {
 }
 
 export async function deleteCategory(id: string) {
-    const supabase = await createClient()
-    const { error } = await supabase
-        .from('album_categories')
-        .delete()
-        .eq('id', id)
-
-    if (error) {
-        throw new Error(error.message)
+    const sql = getDb()
+    try {
+        await sql`DELETE FROM album_categories WHERE id = ${id}`
+    } catch (error) {
+        throw new Error(error instanceof Error ? error.message : 'Failed to delete category')
     }
 
     revalidatePath('/admin/categories')
     revalidatePath('/admin/gallery/new')
     revalidatePath('/gallery')
 }
+

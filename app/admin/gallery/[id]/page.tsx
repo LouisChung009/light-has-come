@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
+import { getDb, Album, Photo } from '@/utils/db'
 import Link from 'next/link'
 import UploadPhotoForm from './UploadPhotoForm'
 import DeletePhotoButton from './DeletePhotoButton'
@@ -9,24 +9,18 @@ import { getCategories } from '../../categories/actions'
 
 export default async function AlbumDetail({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
-    const supabase = await createClient()
+    const sql = getDb()
     const categories = await getCategories()
 
-    const { data: album } = await supabase
-        .from('albums')
-        .select('*')
-        .eq('id', id)
-        .single()
+    const albums = await sql`SELECT * FROM albums WHERE id = ${id} LIMIT 1`
+    const album = albums[0] as Album | undefined
 
-    const { data: photos } = await supabase
-        .from('photos')
-        .select('*')
-        .eq('album_id', id)
-        .order('created_at', { ascending: false })
+    const photos = await sql`SELECT * FROM photos WHERE album_id = ${id} ORDER BY created_at DESC` as Photo[]
 
     if (!album) {
         return <div>Album not found</div>
     }
+
 
     return (
         <div style={{ padding: '2rem' }}>
