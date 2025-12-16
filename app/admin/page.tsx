@@ -23,12 +23,15 @@ export default function LoginPage({
             }}>
                 <h1 style={{
                     textAlign: 'center',
-                    marginBottom: '1.5rem',
+                    marginBottom: '0.5rem',
                     fontSize: '1.5rem',
                     color: '#333'
                 }}>
                     後台管理系統
                 </h1>
+                <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#999', marginBottom: '1.5rem' }}>
+                    System v1.1 (Neon Auth)
+                </p>
 
                 <form action={login} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div>
