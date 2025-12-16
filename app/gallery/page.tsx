@@ -12,9 +12,10 @@ export default async function Gallery({ searchParams }: { searchParams: Promise<
 
     const [categories, albums] = await Promise.all([
         sql`SELECT * FROM album_categories ORDER BY sort_order ASC`,
-        sql`SELECT a.*, (SELECT COUNT(*) FROM photos p WHERE p.album_id = a.id) as photo_count 
+        sql`SELECT a.*, COALESCE(a.is_pinned, false) as is_pinned, 
+            (SELECT COUNT(*) FROM photos p WHERE p.album_id = a.id) as photo_count 
             FROM albums a 
-            ORDER BY a.is_pinned DESC, a.date DESC`
+            ORDER BY COALESCE(a.is_pinned, false) DESC, a.date DESC`
     ])
 
     const safeCategories = (categories || []) as Category[]
