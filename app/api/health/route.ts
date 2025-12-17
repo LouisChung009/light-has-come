@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
 
 /**
- * Health check API to diagnose Vercel environment issues.
+ * Lightweight health check for Vercel. Uses a simple `SELECT 1` to verify DB connectivity.
+ * For heavier diagnostics (counts), call with `?full=true` which will attempt exact counts.
  * This endpoint is TEMPORARY and should be removed after debugging.
  */
-export async function GET() {
+export async function GET(request: Request) {
     const diagnostics = {
         timestamp: new Date().toISOString(),
         env: {
@@ -17,20 +18,35 @@ export async function GET() {
         dbTest: null as any,
     }
 
-    // Try to connect to database
+    // Try to connect to database with a lightweight check
     if (process.env.DATABASE_URL) {
         try {
             const { neon } = await import('@neondatabase/serverless')
             const sql = neon(process.env.DATABASE_URL)
-            const result = await sql`SELECT COUNT(*) as count FROM admin_users`
+
+            // simple connectivity probe
+            await sql`SELECT 1`
+
             diagnostics.dbTest = {
                 status: '✓ Connected',
-                adminUsers: result[0]?.count || 0,
+            }
+
+            // If requested, run a fuller diagnostic (may be slow) using ?full=true
+            const url = new URL(request.url)
+            if (url.searchParams.get('full') === 'true') {
+                try {
+                    const result = await sql`SELECT COUNT(*) as count FROM admin_users`
+                    diagnostics.dbTest.adminUsers = result[0]?.count || 0
+                } catch (err: any) {
+                    console.error('Health full-check admin_users failed:', err.stack || err.message || err)
+                    diagnostics.dbTest.adminUsers = 'error'
+                }
             }
         } catch (error: any) {
+            console.error('Health DB error:', error.stack || error.message || error)
             diagnostics.dbTest = {
                 status: '✗ Failed',
-                error: error.message,
+                error: 'DB connection error (logged)'
             }
         }
     } else {
