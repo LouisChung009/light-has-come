@@ -66,7 +66,7 @@ export default function AnnouncementForm({ initialConfig }: { initialConfig: Ann
                 <label style={{ display: 'block', fontWeight: 600, color: '#111', marginBottom: '0.35rem' }}>海報圖片</label>
                 <PosterUploader defaultUrl={imageUrl} onUploaded={setImageUrl} />
                 <p style={{ margin: '0.35rem 0 0', color: '#6b7280', fontSize: '0.9rem' }}>
-                    可點擊或拖曳上傳，檔案會存到 Supabase Storage，前台彈窗直接使用這張圖。
+                    可點擊或拖曳上傳，檔案會存到 Cloudflare R2，前台彈窗直接使用這張圖。
                 </p>
                 {!imageUrl && <p style={{ color: '#ef4444', fontWeight: 600, marginTop: '0.25rem' }}>請先上傳海報圖片</p>}
             </div>
