@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js'
 import fs from 'fs'
 import path from 'path'
 import dotenv from 'dotenv'
@@ -6,22 +5,18 @@ import sharp from 'sharp'
 import * as faceapi from 'face-api.js'
 import * as tf from '@tensorflow/tfjs'
 import { Canvas, Image, ImageData, loadImage } from 'canvas'
-import { isExternalStorageEnabled, uploadToExternalStorage } from '../utils/storage/external'
+import { uploadToExternalStorage } from '../utils/storage/external'
+import { neon } from '@neondatabase/serverless'
 
 // Load environment variables
 dotenv.config({ path: '.env.local' })
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseServiceKey) {
-    console.error('❌ Missing Supabase credentials. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local')
+if (!process.env.DATABASE_URL) {
+    console.error('❌ Missing DATABASE_URL using Neon.')
     process.exit(1)
 }
 
-// Always use Service Role to bypass RLS for batch operations
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
-console.log('✅ Running with Service Role Key (Admin Mode)')
+const sql = neon(process.env.DATABASE_URL)
 
 // AI 人臉偵測（避免個人正臉特寫）: 使用 face-api + tfjs CPU backend
 let faceModelReady = false
@@ -170,11 +165,8 @@ async function processAlbum(folderName: string) {
     const { title, date, category } = meta
 
     // 0. Check if album already exists
-    const { data: existingAlbum } = await supabase
-        .from('albums')
-        .select('id')
-        .eq('title', title)
-        .single()
+    const existingAlbums = await sql`SELECT id FROM albums WHERE title = ${title}`
+    const existingAlbum = existingAlbums[0]
 
     if (existingAlbum) {
         console.log(`ℹ️ Album "${title}" already exists online.`)
@@ -199,25 +191,17 @@ async function processAlbum(folderName: string) {
     // 1. Create Album
     const id = `${date}-${Math.random().toString(36).substring(2, 8)}`
 
-    const { data: album, error: albumError } = await supabase
-        .from('albums')
-        .insert({
-            id: id,
-            title: title,
-            date: date,
-            category: category,
-            description: 'Imported from LINE (AI Filtered)',
-            cover_color: '#4A90C8'
-        })
-        .select()
-        .single()
-
-    if (albumError) {
+    try {
+        await sql`
+            INSERT INTO albums (id, title, date, category, description, cover_color)
+            VALUES (${id}, ${title}, ${date}, ${category}, 'Imported from LINE (AI Filtered)', '#4A90C8')
+        `
+    } catch (albumError: any) {
         console.error(`❌ Failed to create album "${title}":`, albumError.message)
         return
     }
 
-    console.log(`✅ Album created: ${title} (ID: ${album.id})`)
+    console.log(`✅ Album created: ${title} (ID: ${id})`)
 
     // 2. Read and Filter photos
     const files = fs.readdirSync(folderPath).filter(file => {
@@ -273,7 +257,7 @@ async function processAlbum(folderName: string) {
         const fileBuffer = fs.readFileSync(filePath)
         const fileExt = path.extname(file).toLowerCase()
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}${fileExt}`
-        const storagePath = `${album.id}/${fileName}`
+        const storagePath = `${id}/${fileName}`
 
         const contentType = (() => {
             switch (fileExt) {
@@ -295,37 +279,14 @@ async function processAlbum(folderName: string) {
                 continue
             }
 
-            let publicUrl: string
+            // Always use external storage (R2) as Supabase Storage is removed
+            const publicUrl = await uploadToExternalStorage(storagePath, fileBuffer, contentType)
 
-            if (isExternalStorageEnabled()) {
-                publicUrl = await uploadToExternalStorage(storagePath, fileBuffer, contentType)
-            } else {
-                const { error: uploadError } = await supabase.storage
-                    .from('gallery')
-                    .upload(storagePath, fileBuffer, {
-                        contentType,
-                        upsert: false
-                    })
+            await sql`
+                INSERT INTO photos (album_id, src, alt, width, height)
+                VALUES (${id}, ${publicUrl}, ${file}, 800, 600)
+            `
 
-                if (uploadError) throw uploadError
-
-                const { data: { publicUrl: supabaseUrl } } = supabase.storage
-                    .from('gallery')
-                    .getPublicUrl(storagePath)
-                publicUrl = supabaseUrl
-            }
-
-            const { error: dbError } = await supabase
-                .from('photos')
-                .insert({
-                    album_id: album.id,
-                    src: publicUrl,
-                    alt: file,
-                    width: 800,
-                    height: 600
-                })
-
-            if (dbError) throw dbError
             successCount++
             process.stdout.write('↑')
         } catch (err) {

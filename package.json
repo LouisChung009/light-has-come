@@ -7,14 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "upload-photos": "npx tsx scripts/batch-upload.ts",
-    "import-gallery": "node scripts/import-gallery.mjs"
+    "upload-photos": "npx tsx scripts/batch-upload.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.948.0",
     "@neondatabase/serverless": "^1.0.2",
-    "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.86.0",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "jose": "^6.1.3",
