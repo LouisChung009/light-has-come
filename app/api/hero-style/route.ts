@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+import { getSession } from '@/utils/auth-neon'
+import { getDb } from '@/utils/db'
 
 const fields: { key: string; label: string }[] = [
     { key: 'home_hero_title_color', label: '首頁主視覺標題色' },
@@ -15,30 +16,22 @@ const fields: { key: string; label: string }[] = [
 
 export async function POST(request: Request) {
     try {
-        const body = await request.json()
-        const supabase = await createClient()
-
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
+        const session = await getSession()
+        if (!session?.user) {
             return NextResponse.json({ error: '未登入' }, { status: 401 })
         }
 
-        const payload = fields.map(({ key, label }) => ({
-            id: key,
-            category: 'home',
-            section: 'hero',
-            label,
-            content: bodyMapValue(body, key),
-            content_type: 'text',
-            display_order: 0,
-        }))
+        const body = await request.json()
+        const sql = getDb()
 
-        const { error } = await supabase
-            .from('site_content')
-            .upsert(payload, { onConflict: 'id' })
-
-        if (error) {
-            return NextResponse.json({ error: error.message }, { status: 500 })
+        // Use ON CONFLICT for upsert behavior
+        for (const { key, label } of fields) {
+            const content = bodyMapValue(body, key)
+            await sql`
+                INSERT INTO site_content (id, category, section, label, content, content_type, display_order)
+                VALUES (${key}, 'home', 'hero', ${label}, ${content}, 'text', 0)
+                ON CONFLICT (id) DO UPDATE SET content = ${content}
+            `
         }
 
         return NextResponse.json({ ok: true })

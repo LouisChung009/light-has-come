@@ -1,11 +1,16 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { getSession } from '@/utils/auth-neon'
+import { getDb } from '@/utils/db'
+import { uploadToR2, deleteFromR2 } from '@/utils/r2'
 import { revalidatePath } from 'next/cache'
 
 export async function updateBannerSlide(formData: FormData) {
     const id = formData.get('id') as string
     if (!id) return { error: '缺少 Banner ID' }
+
+    const session = await getSession()
+    if (!session?.user) return { error: '未登入' }
 
     const title = (formData.get('title') as string) || null
     const subtitle = (formData.get('subtitle') as string) || null
@@ -13,64 +18,64 @@ export async function updateBannerSlide(formData: FormData) {
     const displayOrder = parseInt((formData.get('displayOrder') as string) || '0', 10) || 0
     const file = formData.get('file') as File | null
 
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: '未登入' }
+    const sql = getDb()
 
     let mediaUrl: string | null = null
     let mediaType: string | null = null
 
     if (file && file.size > 0) {
-        // 先找舊檔路徑
-        const { data: existing } = await supabase
-            .from('banner_slides')
-            .select('media_url')
-            .eq('id', id)
-            .maybeSingle()
+        // Get old file path for deletion
+        const existing = await sql`
+            SELECT media_url FROM banner_slides WHERE id = ${id}
+        `
 
+        // Upload new file to R2
         const ext = file.name.split('.').pop()
-        const path = `banners/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+        const key = `banners/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
         const buffer = Buffer.from(await file.arrayBuffer())
 
-        const { error: uploadError } = await supabase.storage
-            .from('gallery')
-            .upload(path, buffer, {
-                contentType: file.type || undefined,
-                upsert: true,
-            })
+        const uploadResult = await uploadToR2(key, buffer, file.type)
+        if (!uploadResult.success) {
+            return { error: uploadResult.error || 'Upload failed' }
+        }
 
-        if (uploadError) return { error: uploadError.message }
-
-        const { data: publicUrlData } = supabase.storage.from('gallery').getPublicUrl(path)
-        mediaUrl = publicUrlData.publicUrl
+        mediaUrl = uploadResult.url!
         mediaType = file.type?.startsWith('video/') ? 'video' : 'image'
 
-        // 刪掉舊檔
-        if (existing?.media_url) {
-            const oldPath = existing.media_url.split('/gallery/')[1]
-            if (oldPath) {
-                await supabase.storage.from('gallery').remove([oldPath])
+        // Delete old file from R2 if exists
+        if (existing[0]?.media_url) {
+            const oldUrl = existing[0].media_url
+            // Extract key from URL (assuming format: BASE_URL/key)
+            const baseUrl = process.env.EXTERNAL_PUBLIC_BASE_URL || ''
+            if (oldUrl.startsWith(baseUrl)) {
+                const oldKey = oldUrl.replace(baseUrl + '/', '')
+                await deleteFromR2(oldKey)
             }
         }
     }
 
-    const updatePayload: Record<string, any> = {
-        title,
-        subtitle,
-        link_url: linkUrl || null,
-        display_order: displayOrder,
-    }
+    // Build update query dynamically
     if (mediaUrl) {
-        updatePayload.media_url = mediaUrl
-        updatePayload.media_type = mediaType
+        await sql`
+            UPDATE banner_slides 
+            SET title = ${title}, 
+                subtitle = ${subtitle}, 
+                link_url = ${linkUrl}, 
+                display_order = ${displayOrder},
+                media_url = ${mediaUrl},
+                media_type = ${mediaType}
+            WHERE id = ${id}
+        `
+    } else {
+        await sql`
+            UPDATE banner_slides 
+            SET title = ${title}, 
+                subtitle = ${subtitle}, 
+                link_url = ${linkUrl}, 
+                display_order = ${displayOrder}
+            WHERE id = ${id}
+        `
     }
-
-    const { error } = await supabase
-        .from('banner_slides')
-        .update(updatePayload)
-        .eq('id', id)
-
-    if (error) return { error: error.message }
 
     revalidatePath('/admin/banner')
     revalidatePath('/')

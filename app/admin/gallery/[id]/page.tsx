@@ -57,7 +57,7 @@ export default async function AlbumDetail({ params }: { params: Promise<{ id: st
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={photo.src}
-                            alt={photo.alt}
+                            alt={photo.alt || ''}
                             style={{
                                 width: '100%',
                                 height: '100%',

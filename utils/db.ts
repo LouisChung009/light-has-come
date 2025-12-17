@@ -2,10 +2,16 @@ import { neon } from '@neondatabase/serverless'
 
 // Create a SQL client
 export function getDb() {
-    const databaseUrl = process.env.DATABASE_URL
+    let databaseUrl = process.env.DATABASE_URL
     if (!databaseUrl) {
         throw new Error('DATABASE_URL environment variable is not set')
     }
+
+    // Sanitize the URL - remove any accidental quotes and fix HTML entities
+    databaseUrl = databaseUrl
+        .replace(/^["']|["']$/g, '') // Remove surrounding quotes
+        .replace(/&amp;/g, '&')       // Fix HTML-escaped ampersands
+
     return neon(databaseUrl)
 }
 

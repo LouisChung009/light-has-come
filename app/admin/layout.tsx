@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server"
+import { getSession } from "@/utils/auth-neon"
 import Link from "next/link"
 import { logout } from "./actions"
 
@@ -7,12 +7,13 @@ export default async function AdminLayout({
 }: {
     children: React.ReactNode
 }) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const session = await getSession()
 
-    if (!user) {
+    if (!session?.user) {
         return <>{children}</>
     }
+
+    const user = session.user
 
     return (
         <div className="admin-panel" style={{ display: 'flex', minHeight: '100vh', fontFamily: 'sans-serif' }}>

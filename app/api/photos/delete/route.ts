@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+import { getSession } from '@/utils/auth-neon'
+import { getDb } from '@/utils/db'
+import { deleteFromR2 } from '@/utils/r2'
 
 export async function POST(request: Request) {
     try {
-        const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
+        const session = await getSession()
+        if (!session?.user) {
             return NextResponse.json({ error: '未登入' }, { status: 401 })
         }
 
@@ -15,19 +16,16 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: '缺少必要參數' }, { status: 400 })
         }
 
-        const path = src.split('/gallery/')[1]
-        if (path) {
-            await supabase.storage.from('gallery').remove([path])
+        // Delete from R2 if it's an R2 URL
+        const baseUrl = process.env.EXTERNAL_PUBLIC_BASE_URL || ''
+        if (src.startsWith(baseUrl)) {
+            const key = src.replace(baseUrl + '/', '')
+            await deleteFromR2(key)
         }
 
-        const { error } = await supabase
-            .from('photos')
-            .delete()
-            .eq('id', id)
-
-        if (error) {
-            return NextResponse.json({ error: error.message }, { status: 500 })
-        }
+        // Delete from database
+        const sql = getDb()
+        await sql`DELETE FROM photos WHERE id = ${id}`
 
         return NextResponse.json({ ok: true })
     } catch (error) {

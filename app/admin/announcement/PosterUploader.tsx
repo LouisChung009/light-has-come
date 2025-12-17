@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { uploadPoster } from './actions'
 
 export default function PosterUploader({ defaultUrl, onUploaded }: { defaultUrl?: string, onUploaded: (url: string) => void }) {
     const [preview, setPreview] = useState(defaultUrl || '')
@@ -9,28 +9,28 @@ export default function PosterUploader({ defaultUrl, onUploaded }: { defaultUrl?
     const [errorMsg, setErrorMsg] = useState('')
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    const supabase = createClient()
-
     const handleFiles = async (files: FileList | null) => {
         if (!files || files.length === 0) return
         const file = files[0]
         setErrorMsg('')
         setIsUploading(true)
         try {
-            const ext = file.name.split('.').pop() || 'png'
-            const path = `announcements/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-            const { error: uploadError } = await supabase.storage.from('gallery').upload(path, file, {
-                upsert: true,
-            })
-            if (uploadError) throw uploadError
+            const formData = new FormData()
+            formData.append('file', file)
 
-            const { data } = supabase.storage.from('gallery').getPublicUrl(path)
-            const url = data.publicUrl
-            setPreview(url)
-            onUploaded(url)
-        } catch (err) {
+            const result = await uploadPoster(formData)
+
+            if (result.error) {
+                throw new Error(result.error)
+            }
+
+            if (result.url) {
+                setPreview(result.url)
+                onUploaded(result.url)
+            }
+        } catch (err: any) {
             console.error(err)
-            setErrorMsg('上傳失敗，請稍後再試')
+            setErrorMsg(err.message || '上傳失敗，請稍後再試')
         } finally {
             setIsUploading(false)
         }
