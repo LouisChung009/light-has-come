@@ -40,7 +40,7 @@ async function clearBucket() {
     let deletedCount = 0;
 
     do {
-        const listCmd = new ListObjectsV2Command({
+        const listCmd: ListObjectsV2Command = new ListObjectsV2Command({
             Bucket: config.bucket,
             Prefix: config.prefix ? (config.prefix + '/') : undefined,
             ContinuationToken: continuationToken
