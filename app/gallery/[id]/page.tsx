@@ -12,9 +12,13 @@ export default async function AlbumDetail({ params }: { params: Promise<{ id: st
     const albums = await sql`
         SELECT id, title, date, description, cover_color 
         FROM albums WHERE id = ${id}
-    ` as Album[]
+    `
 
-    const album = albums[0] || null
+    // Serialize date for hydration
+    const album = albums.map((a: any) => ({
+        ...a,
+        date: a.date instanceof Date ? a.date.toISOString().split('T')[0] : String(a.date),
+    }))[0] || null
 
     if (!album) {
         notFound()
