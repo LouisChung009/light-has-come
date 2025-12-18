@@ -96,10 +96,7 @@ export default async function Gallery({ searchParams }: { searchParams: Promise<
             {/* Album Grid */}
             <section style={{ padding: '4rem 1.5rem' }}>
                 <div className="container">
-                    {/* Debug info - remove after testing */}
-                    <div style={{ background: '#eef', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.875rem' }}>
-                        DEBUG: safeAlbums={safeAlbums.length}, filteredAlbums={filteredAlbums.length}, categories={safeCategories.length}, filter={filter}
-                    </div>
+
 
                     {errorMessage ? (
                         <div style={{ textAlign: 'center', padding: '2rem', color: '#c00', background: '#fee', borderRadius: '1rem' }}>

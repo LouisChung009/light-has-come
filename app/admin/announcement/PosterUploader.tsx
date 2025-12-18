@@ -12,6 +12,13 @@ export default function PosterUploader({ defaultUrl, onUploaded }: { defaultUrl?
     const handleFiles = async (files: FileList | null) => {
         if (!files || files.length === 0) return
         const file = files[0]
+
+        // 檢查檔案大小 (限制 4MB，因為 Vercel Server Action 限制 4.5MB)
+        if (file.size > 4 * 1024 * 1024) {
+            setErrorMsg('檔案過大 (請小於 4MB)')
+            return
+        }
+
         setErrorMsg('')
         setIsUploading(true)
         try {
