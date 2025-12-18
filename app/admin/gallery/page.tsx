@@ -26,7 +26,11 @@ export default async function AdminGallery({ searchParams }: { searchParams: Pro
             break
     }
 
-    const albums = await sql`SELECT * FROM albums ORDER BY ${sql.unsafe(orderBy)}` as Album[]
+    const rawAlbums = await sql`SELECT * FROM albums ORDER BY ${sql.unsafe(orderBy)}`
+    const albums = rawAlbums.map((a: any) => ({
+        ...a,
+        date: a.date instanceof Date ? a.date.toISOString().split('T')[0] : String(a.date),
+    })) as Album[]
 
 
     return (

@@ -24,8 +24,9 @@ export default async function Gallery({ searchParams }: { searchParams: Promise<
         ])
 
         safeCategories = (categories || []) as Category[]
-        safeAlbums = (albums || []).map((a: Record<string, unknown>) => ({
+        safeAlbums = (albums || []).map((a: any) => ({
             ...a,
+            date: a.date instanceof Date ? a.date.toISOString().split('T')[0] : String(a.date),
             photos: [{ count: Number(a.photo_count) || 0 }]
         })) as (Album & { photos?: { count: number }[] })[]
     } catch (error) {
