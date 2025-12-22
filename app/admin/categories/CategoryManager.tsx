@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { createCategory, updateCategory, deleteCategory, type Category } from './actions'
+import { createCategory, updateCategory, deleteCategory } from './actions'
+import type { Category } from '@/utils/db'
 
 export default function CategoryManager({ initialCategories }: { initialCategories: Category[] }) {
     const categories = initialCategories
