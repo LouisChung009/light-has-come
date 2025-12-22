@@ -19,9 +19,9 @@ async function seed() {
         await sql`
             INSERT INTO admin_users (email, password_hash, name)
             VALUES (${email}, ${hash}, ${name})
-            ON CONFLICT (email) DO NOTHING
+            ON CONFLICT (email) DO UPDATE SET password_hash = ${hash}
         `
-        console.log('Admin user created successfully.')
+        console.log('Admin user created/updated successfully.')
     } catch (err) {
         console.error('Error creating admin user:', err)
     }

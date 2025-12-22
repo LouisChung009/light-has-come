@@ -1,9 +1,9 @@
 'use server'
 
-import { getDb, Category } from '@/utils/db'
+import { getDb } from '@/utils/db'
+import type { Category } from '@/utils/db'
 import { revalidatePath } from 'next/cache'
 
-export type { Category }
 
 export async function getCategories(): Promise<Category[]> {
     const sql = getDb()
