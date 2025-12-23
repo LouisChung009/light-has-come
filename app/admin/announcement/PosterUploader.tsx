@@ -25,7 +25,13 @@ export default function PosterUploader({ defaultUrl, onUploaded }: { defaultUrl?
             const formData = new FormData()
             formData.append('file', file)
 
+            console.log('Calling uploadPoster...')
             const result = await uploadPoster(formData)
+            console.log('uploadPoster result:', result)
+
+            if (!result) {
+                throw new Error('伺服器回應為空')
+            }
 
             if (result.error) {
                 throw new Error(result.error)
@@ -36,8 +42,9 @@ export default function PosterUploader({ defaultUrl, onUploaded }: { defaultUrl?
                 onUploaded(result.url)
             }
         } catch (err: any) {
-            console.error(err)
-            setErrorMsg(err.message || '上傳失敗，請稍後再試')
+            console.error('Upload error:', err)
+            const errorMessage = err?.message || err?.toString() || '上傳失敗，請稍後再試'
+            setErrorMsg(errorMessage)
         } finally {
             setIsUploading(false)
         }
