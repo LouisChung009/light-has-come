@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { getDb } from '@/utils/db'
 import { getSession } from '@/utils/auth-neon'
 
@@ -43,9 +44,13 @@ export async function POST(request: Request) {
                 updated_at = NOW()
         `
 
+        // Clear homepage cache so the new announcement shows immediately
+        revalidatePath('/')
+
         return NextResponse.json({ ok: true })
     } catch (error) {
         console.error('announcement save error', error)
         return NextResponse.json({ error: '伺服器錯誤，請稍後再試' }, { status: 500 })
     }
 }
+
