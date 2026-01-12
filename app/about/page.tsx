@@ -81,9 +81,11 @@ export default async function About() {
             {/* Team Section */}
             <section style={{ padding: '4rem 1.5rem', background: 'white' }}>
                 <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h2 style={{ fontSize: '2rem', color: '#333', marginBottom: '1rem', textAlign: 'center' }}>愛心家長團隊</h2>
+                    <h2 style={{ fontSize: '2rem', color: '#333', marginBottom: '1rem', textAlign: 'center' }}>
+                        {getContent('about_team_title') || '愛心家長團隊'}
+                    </h2>
                     <p style={{ fontSize: '1.125rem', color: '#666', textAlign: 'center', marginBottom: '3rem', maxWidth: '800px', margin: '0 auto 3rem', lineHeight: 1.8 }}>
-                        由一群喜愛孩子、對於孩子的品格有負擔的家長組成，我們以愛心陪伴每一位孩子成長。
+                        {getContent('about_team_desc') || '由一群喜愛孩子、對於孩子的品格有負擔的家長組成，我們以愛心陪伴每一位孩子成長。'}
                     </p>
                     <div style={{
                         maxWidth: '800px',
@@ -92,20 +94,44 @@ export default async function About() {
                         overflow: 'hidden',
                         boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
                     }}>
-                        {/* 團體照 - 可在後台上傳替換 */}
-                        <div style={{
-                            background: 'linear-gradient(135deg, #4A90C8, #B4E7CE)',
-                            padding: '4rem',
-                            textAlign: 'center',
-                            minHeight: '300px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
-                            <div style={{ fontSize: '6rem', marginBottom: '1.5rem' }}>👨‍👩‍👧‍👦</div>
-                            <p style={{ color: 'white', fontSize: '1.25rem', fontWeight: 600 }}>光·來了 服事團隊</p>
-                        </div>
+                        {/* 團體照 - 可在後台文案管理上傳 */}
+                        {getContent('about_team_photo') ? (
+                            <div style={{ position: 'relative' }}>
+                                <img
+                                    src={getContent('about_team_photo')}
+                                    alt={getContent('about_team_caption') || '服事團隊'}
+                                    style={{ width: '100%', height: 'auto', display: 'block' }}
+                                />
+                                {getContent('about_team_caption') && (
+                                    <p style={{
+                                        textAlign: 'center',
+                                        padding: '1rem',
+                                        background: 'rgba(0,0,0,0.6)',
+                                        color: 'white',
+                                        margin: 0,
+                                        fontSize: '1.125rem'
+                                    }}>
+                                        {getContent('about_team_caption')}
+                                    </p>
+                                )}
+                            </div>
+                        ) : (
+                            <div style={{
+                                background: 'linear-gradient(135deg, #4A90C8, #B4E7CE)',
+                                padding: '4rem',
+                                textAlign: 'center',
+                                minHeight: '300px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <div style={{ fontSize: '6rem', marginBottom: '1.5rem' }}>👨‍👩‍👧‍👦</div>
+                                <p style={{ color: 'white', fontSize: '1.25rem', fontWeight: 600 }}>
+                                    {getContent('about_team_caption') || '光·來了 服事團隊'}
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>

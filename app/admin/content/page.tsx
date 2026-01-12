@@ -42,6 +42,7 @@ export default async function ContentManagement() {
         joshua: '約書亞班',
         vision: '願景',
         mission: '使命',
+        team: '師資團隊',
         info: '基本資訊',
         general: '一般'
     }
