@@ -122,3 +122,37 @@ export async function toggleBannerSlide(id: string, isActive: boolean) {
         return { error: 'Failed to toggle banner slide' }
     }
 }
+
+export async function uploadContentImage(formData: FormData): Promise<{ url?: string; error?: string }> {
+    const file = formData.get('file') as File
+    const contentId = formData.get('contentId') as string
+
+    if (!file || file.size === 0) {
+        return { error: '請選擇檔案' }
+    }
+
+    try {
+        const fileExt = file.name.split('.').pop() || 'jpg'
+        const fileName = `content/${contentId}-${Date.now()}.${fileExt}`
+        const buffer = new Uint8Array(await file.arrayBuffer())
+
+        const publicUrl = await uploadToExternalStorage(fileName, buffer, file.type)
+
+        // Update the content in database
+        const sql = getDb()
+        await sql`
+            UPDATE site_content 
+            SET content = ${publicUrl}, updated_at = NOW()
+            WHERE id = ${contentId}
+        `
+
+        revalidatePath('/')
+        revalidatePath('/about')
+        revalidatePath('/admin/content')
+
+        return { url: publicUrl }
+    } catch (error) {
+        console.error('Error uploading content image:', error)
+        return { error: '上傳失敗' }
+    }
+}
