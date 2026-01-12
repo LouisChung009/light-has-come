@@ -148,7 +148,7 @@ export default async function Home() {
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-                        {/* 幼幼班 */}
+                        {/* 寶貝班 */}
                         <div style={{ background: 'linear-gradient(135deg, #FEF3C7, #FDE68A)', padding: '2rem', borderRadius: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
                             <h3 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', color: '#92400E' }}>
                                 {getContent('courses_toddler_name')}
@@ -176,6 +176,22 @@ export default async function Home() {
                                 {getContent('courses_samuel_desc')}
                             </p>
                             <Link href="/courses" style={{ color: '#1E3A8A', fontWeight: 600, textDecoration: 'none' }}>
+                                了解更多 →
+                            </Link>
+                        </div>
+
+                        {/* 但以理班 */}
+                        <div style={{ background: 'linear-gradient(135deg, #D1FAE5, #A7F3D0)', padding: '2rem', borderRadius: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                            <h3 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', color: '#064E3B' }}>
+                                {getContent('courses_daniel_name') || '但以理班'}
+                            </h3>
+                            <p style={{ fontSize: 'clamp(1.2rem, 3vw, 1.35rem)', color: '#065F46', marginBottom: '1rem' }}>
+                                {getContent('courses_daniel_age') || '9-10歲'}
+                            </p>
+                            <p style={{ color: '#064E3B', lineHeight: 1.95, marginBottom: '1.5rem', fontSize: 'clamp(1.2rem, 3vw, 1.35rem)' }}>
+                                {getContent('courses_daniel_desc') || '培養獨立思考與問題解決能力，建立正確的價值觀與人生觀。'}
+                            </p>
+                            <Link href="/courses" style={{ color: '#064E3B', fontWeight: 600, textDecoration: 'none' }}>
                                 了解更多 →
                             </Link>
                         </div>

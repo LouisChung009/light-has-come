@@ -81,11 +81,15 @@ export default async function About() {
             {/* Team Section */}
             <section style={{ padding: '4rem 1.5rem', background: 'white' }}>
                 <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h2 style={{ fontSize: '2rem', color: '#333', marginBottom: '3rem', textAlign: 'center' }}>專業師資團隊</h2>
+                    <h2 style={{ fontSize: '2rem', color: '#333', marginBottom: '1rem', textAlign: 'center' }}>愛心家長團隊</h2>
+                    <p style={{ fontSize: '1.125rem', color: '#666', textAlign: 'center', marginBottom: '3rem', maxWidth: '800px', margin: '0 auto 3rem', lineHeight: 1.8 }}>
+                        由一群喜愛孩子、對於孩子的品格有負擔的家長組成，我們以愛心陪伴每一位孩子成長。
+                    </p>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
                         {[
-                            { name: '快樂老師', role: '幼幼班導師', icon: '👩‍🏫', color: '#FFD93D' },
+                            { name: '快樂老師', role: '寶貝班導師', icon: '👩‍🏫', color: '#FFD93D' },
                             { name: '大衛老師', role: '撒母耳班導師', icon: '👨‍🏫', color: '#4A90C8' },
+                            { name: '恩典老師', role: '但以理班導師', icon: '👨‍🏫', color: '#10B981' },
                             { name: '愛心老師', role: '約書亞班導師', icon: '👩‍🏫', color: '#FFAAA5' },
                             { name: '音樂老師', role: '敬拜讚美', icon: '🎵', color: '#B4E7CE' },
                         ].map((member, i) => (

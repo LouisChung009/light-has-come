@@ -25,9 +25,10 @@ export default function RegisterForm() {
         if (formData.childAge) {
             const age = parseInt(formData.childAge)
             let suggestedClass = ''
-            if (age >= 2 && age <= 6) suggestedClass = '幼幼班'
-            else if (age >= 7 && age <= 9) suggestedClass = '撒母耳班'
-            else if (age >= 10 && age <= 12) suggestedClass = '約書亞班'
+            if (age <= 6) suggestedClass = '寶貝班'
+            else if (age >= 7 && age <= 8) suggestedClass = '撒母耳班'
+            else if (age >= 9 && age <= 10) suggestedClass = '但以理班'
+            else if (age >= 11 && age <= 12) suggestedClass = '約書亞班'
 
             if (suggestedClass) {
                 setFormData(prev => ({ ...prev, classType: suggestedClass }))

@@ -45,10 +45,12 @@ export default function RegistrationRow({ reg }: { reg: Registration }) {
                     borderRadius: '9999px',
                     fontSize: '0.75rem',
                     fontWeight: 600,
-                    background: reg.class_type === '幼幼班' ? '#FEF3C7' :
-                        reg.class_type === '撒母耳班' ? '#E0F2FE' : '#FEE2E2',
-                    color: reg.class_type === '幼幼班' ? '#D97706' :
-                        reg.class_type === '撒母耳班' ? '#0284C7' : '#DC2626'
+                    background: reg.class_type === '寶貝班' ? '#FEF3C7' :
+                        reg.class_type === '撒母耳班' ? '#E0F2FE' :
+                            reg.class_type === '但以理班' ? '#D1FAE5' : '#FEE2E2',
+                    color: reg.class_type === '寶貝班' ? '#D97706' :
+                        reg.class_type === '撒母耳班' ? '#0284C7' :
+                            reg.class_type === '但以理班' ? '#059669' : '#DC2626'
                 }}>
                     {reg.class_type}
                 </span>

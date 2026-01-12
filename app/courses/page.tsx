@@ -40,7 +40,7 @@ export default async function Courses() {
             <section style={{ padding: '4rem 1.5rem' }}>
                 <div className="container">
 
-                    {/* 幼幼班 */}
+                    {/* 寶貝班 */}
                     <div style={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -142,6 +142,60 @@ export default async function Courses() {
                                         <li>🎭 戲劇扮演</li>
                                         <li>🏃‍♂️ 團體競賽</li>
                                         <li>✂️ 手作DIY</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 但以理班 */}
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '2rem',
+                        marginBottom: '4rem',
+                        background: 'white',
+                        borderRadius: '1.5rem',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
+                    }}>
+                        <div style={{
+                            background: 'linear-gradient(135deg, #10B981, #6EE7B7)',
+                            padding: '3rem 2rem',
+                            textAlign: 'center',
+                            color: 'white'
+                        }}>
+                            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🦁</div>
+                            <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
+                                {getContent('courses_daniel_name') || '但以理班'}
+                            </h2>
+                            <p style={{ fontSize: '1.25rem', opacity: 0.9 }}>
+                                {getContent('courses_daniel_age') || '9-10歲'}
+                            </p>
+                        </div>
+                        <div style={{ padding: '2rem 3rem 3rem' }}>
+                            <h3 style={{ fontSize: '1.5rem', color: '#333', marginBottom: '1.5rem', borderBottom: '2px solid #10B981', display: 'inline-block', paddingBottom: '0.5rem' }}>課程特色</h3>
+                            <p style={{ color: '#666', lineHeight: 1.8, marginBottom: '2rem' }}>
+                                {getContent('courses_daniel_desc') || '培養孩子獨立思考與問題解決能力，建立正確的價值觀與人生觀。'}
+                            </p>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
+                                <div>
+                                    <h4 style={{ fontSize: '1.125rem', color: '#10B981', marginBottom: '1rem', fontWeight: 600 }}>學習重點</h4>
+                                    <ul style={{ listStyle: 'none', padding: 0, color: '#666', lineHeight: 2 }}>
+                                        <li>✨ 深入探索聖經真理</li>
+                                        <li>✨ 培養批判性思考</li>
+                                        <li>✨ 學習執羽有禮</li>
+                                        <li>✨ 建立個人信仰</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 style={{ fontSize: '1.125rem', color: '#10B981', marginBottom: '1rem', fontWeight: 600 }}>精彩活動</h4>
+                                    <ul style={{ listStyle: 'none', padding: 0, color: '#666', lineHeight: 2 }}>
+                                        <li>📚 聖經專題研讀</li>
+                                        <li>🎯 口才訓練</li>
+                                        <li>🎭 創意創作</li>
+                                        <li>🌍 文化體驗</li>
                                     </ul>
                                 </div>
                             </div>
