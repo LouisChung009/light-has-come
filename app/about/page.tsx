@@ -85,32 +85,27 @@ export default async function About() {
                     <p style={{ fontSize: '1.125rem', color: '#666', textAlign: 'center', marginBottom: '3rem', maxWidth: '800px', margin: '0 auto 3rem', lineHeight: 1.8 }}>
                         由一群喜愛孩子、對於孩子的品格有負擔的家長組成，我們以愛心陪伴每一位孩子成長。
                     </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
-                        {[
-                            { name: '快樂老師', role: '寶貝班導師', icon: '👩‍🏫', color: '#FFD93D' },
-                            { name: '大衛老師', role: '撒母耳班導師', icon: '👨‍🏫', color: '#4A90C8' },
-                            { name: '恩典老師', role: '但以理班導師', icon: '👨‍🏫', color: '#10B981' },
-                            { name: '愛心老師', role: '約書亞班導師', icon: '👩‍🏫', color: '#FFAAA5' },
-                            { name: '音樂老師', role: '敬拜讚美', icon: '🎵', color: '#B4E7CE' },
-                        ].map((member, i) => (
-                            <div key={i} style={{
-                                background: 'white',
-                                padding: '2rem',
-                                borderRadius: '1rem',
-                                textAlign: 'center',
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-                            }}>
-                                <div style={{
-                                    width: '100px', height: '100px', background: member.color, borderRadius: '50%',
-                                    margin: '0 auto 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontSize: '3rem'
-                                }}>
-                                    {member.icon}
-                                </div>
-                                <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', color: '#333' }}>{member.name}</h3>
-                                <p style={{ color: '#666', fontSize: '0.875rem' }}>{member.role}</p>
-                            </div>
-                        ))}
+                    <div style={{
+                        maxWidth: '800px',
+                        margin: '0 auto',
+                        borderRadius: '1.5rem',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                    }}>
+                        {/* 團體照 - 可在後台上傳替換 */}
+                        <div style={{
+                            background: 'linear-gradient(135deg, #4A90C8, #B4E7CE)',
+                            padding: '4rem',
+                            textAlign: 'center',
+                            minHeight: '300px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <div style={{ fontSize: '6rem', marginBottom: '1.5rem' }}>👨‍👩‍👧‍👦</div>
+                            <p style={{ color: 'white', fontSize: '1.25rem', fontWeight: 600 }}>光·來了 服事團隊</p>
+                        </div>
                     </div>
                 </div>
             </section>
